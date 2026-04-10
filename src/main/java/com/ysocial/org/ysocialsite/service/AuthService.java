@@ -101,7 +101,7 @@ public class AuthService {
         user.setStatus(AccountStatus.ACTIVE);
         userRepository.save(user);
     }
-    
+
     public String generateCode() {
         SecureRandom random = new SecureRandom();
         int code = 1000 + random.nextInt(9000);
