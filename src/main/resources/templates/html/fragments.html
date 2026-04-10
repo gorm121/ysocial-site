@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="error-toast" 
+        class="error-msg" 
+        onclick="this.remove()"
+        style="position: fixed; top: 30px; right: 30px; background-color: #ff4d4f; color: white; padding: 16px 24px; border-radius: 8px; z-index: 99999; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer; min-width: 200px; display: block !important;"
+        hx-on:htmx:load="setTimeout(() => this.remove(), 4000)">
+        
+        <strong style="display: block; margin-bottom: 4px;">Ошибка:</strong>
+        <span th:text="${message}">Текст ошибки</span>
+
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            .error-msg { animation: slideIn 0.3s ease-out; }
+        </style>
+    </div>
+
+</body>
+</html>
