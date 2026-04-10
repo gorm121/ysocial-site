@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS chats CASCADE;
 
 
 CREATE TABLE users (
-    id            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    id            BIGSERIAL    PRIMARY KEY,
     username      VARCHAR(50)  NOT NULL UNIQUE,
     email         VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE users (
 
 
 CREATE TABLE profiles (
-    user_id    UUID           PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    user_id    BIGSERIAL      PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     first_name VARCHAR(100),
     last_name  VARCHAR(100),
     city       VARCHAR(100),
@@ -35,7 +35,7 @@ CREATE TABLE profiles (
 
 CREATE TABLE posts (
     id          BIGSERIAL     PRIMARY KEY,
-    author_id   UUID          NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    author_id   BIGSERIAL     NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content     VARCHAR(255)  NOT NULL,
     image_url   VARCHAR(255),
     created_at  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
@@ -45,7 +45,7 @@ CREATE TABLE comments (
     id            BIGSERIAL       PRIMARY KEY,
     comment_order INT             NOT NULL,
     post_id       BIGINT          NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    author_id     UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    author_id     BIGSERIAL       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     text          VARCHAR(255)    NOT NULL,
     created_at    TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
@@ -54,7 +54,7 @@ CREATE TABLE comments (
 CREATE TABLE post_reactions (
     id          BIGSERIAL   PRIMARY KEY,
     post_id     BIGINT      NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id     BIGSERIAL   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     type        VARCHAR(50) NOT NULL,
     created_at  TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (post_id, user_id)
@@ -62,8 +62,8 @@ CREATE TABLE post_reactions (
 
 CREATE TABLE friendships (
     id              BIGSERIAL   PRIMARY KEY,
-    requester_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    addressee_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    requester_id    BIGSERIAL   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    addressee_id    BIGSERIAL   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status          VARCHAR(50) NOT NULL,
     created_at      TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
@@ -73,8 +73,8 @@ CREATE TABLE friendships (
 CREATE TABLE messages (
     id              BIGSERIAL       PRIMARY KEY,
     chat_id         BIGINT          NOT NULL,
-    sender_id       UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    recipient_id    UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sender_id       BIGSERIAL            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id    BIGSERIAL            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content         VARCHAR(255)    NOT NULL,
     is_read         BOOLEAN         NOT NULL DEFAULT false,
     sent_at         TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
@@ -82,8 +82,8 @@ CREATE TABLE messages (
 
 CREATE TABLE chats (
     id                  BIGSERIAL       PRIMARY KEY,
-    user1               UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    user2               UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user1               BIGSERIAL            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user2               BIGSERIAL            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     last_message_text   VARCHAR(255),
     last_sent           TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user1, user2)
