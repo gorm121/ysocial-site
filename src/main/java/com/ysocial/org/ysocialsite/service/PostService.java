@@ -1,0 +1,131 @@
+package com.ysocial.org.ysocialsite.service;
+
+import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
+import com.ysocial.org.ysocialsite.dto.response.CommentResponse;
+import com.ysocial.org.ysocialsite.dto.response.PostResponse;
+import com.ysocial.org.ysocialsite.entites.*;
+import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
+import com.ysocial.org.ysocialsite.enums.ReactionType;
+import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
+import com.ysocial.org.ysocialsite.repository.PostRepository;
+import com.ysocial.org.ysocialsite.repository.ProfileRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+public class PostService {
+    private final PostRepository postRepository;
+    private final FriendshipRepository friendshipRepository;
+    private final ProfileRepository profileRepository;
+    
+    private final UserService userService;
+
+    public PostService(PostRepository postRepository, FriendshipRepository friendshipRepository, ProfileRepository profileRepository, UserService userService) {
+        this.postRepository = postRepository;
+        this.friendshipRepository = friendshipRepository;
+        this.profileRepository = profileRepository;
+        this.userService = userService;
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getFeed(UserDetails userDetails, int page, int size) {
+        User currentUser = userService.getUserByUserDetails(userDetails);
+        Long currentUserId = currentUser.getId();
+
+        // Собираем айдишники наших друзей
+        List<Long> friendIds = friendshipRepository.findFriendIdsWithStatus(currentUserId, FriendshipStatus.ACCEPTED);
+        friendIds.add(currentUserId); // Добавляем еще и себя
+
+        // Pageable тут нужен лишь для PageImpl, который нужен для фронтенда (hasNext())
+        Pageable pageable = PageRequest.of(page, size);
+
+        long totalElements = postRepository.countNewsFeed(friendIds);
+        if (totalElements == 0) {
+            // если нет ничо отдаем пустой Page
+            return Page.empty(pageable);
+        }
+
+        // ручной расчет offset, потому что в Spring Data JDBC автоматическая пагинация (Pageable)
+        // часто конфликтует со сложными SQL-запросами, содержащими JOIN и IN
+        long offset = (long) page * size;
+        List<Long> postIds = postRepository.findNewsFeedIds(friendIds, size, offset);
+
+        //если нет постов, отдаем пустой Page
+        if (postIds.isEmpty()) return Page.empty(pageable);
+
+        // Загружаем посты с сохранением порядка сортировки из ленты
+        // простой WHERE id IN (:ids) может перемешать посты,
+        // поэтому делаем сортировку по created_at DESC, id DESC
+        // так же там еще подгрузятся реакции и комменты к постам, через @MappedCollection(idColumn = "post_id")
+        // и @MappedCollection(idColumn = "post_id", keyColumn = "comment_order") соответственно
+        List<Post> posts = postRepository.findAllByIdsSorted(postIds);
+
+        //делаем set так как у нас может быть 5 постов от одного чела
+        Set<Long> userIdsToFetch = posts.stream().map(Post::getAuthorId).collect(Collectors.toSet());
+
+        // тут добавляем еще челов из комментов
+        posts.forEach(post -> 
+            post.getComments().forEach(comment -> userIdsToFetch.add(comment.getAuthorId()))
+        );
+
+        // собираем наши профили одним запросом
+        Map<Long, Profile> profilesMap = profileRepository.findAllByUsersId(new ArrayList<>(userIdsToFetch))
+                .stream().collect(Collectors.toMap(Profile::getUserId, p -> p));
+
+        // Маппим посты в DTO, передавая Map с профилями для быстрого доступа
+        List<PostResponse> dtos = posts.stream()
+                .map(post -> mapToDto(post, profilesMap, currentUserId))
+                .toList();
+
+
+        return new PageImpl<>(dtos, pageable, totalElements);
+    }
+
+
+    private PostResponse mapToDto(Post post, Map<Long, Profile> profilesMap, Long currentUserId) {
+        // Считаем реакции
+        long likes = post.getReactions().stream().filter(r -> r.getType() == ReactionType.LIKE).count();
+        long dislikes = post.getReactions().stream().filter(r -> r.getType() == ReactionType.DISLIKE).count();
+
+        // Ищем реакцию текущего пользователя
+        ReactionType myReaction = post.getReactions().stream()
+                .filter(r -> r.getUserId().equals(currentUserId))
+                .map(PostReaction::getType)
+                .findFirst().orElse(null);
+        // получаем профиль за O(1)
+        // Без Map пришлось бы делать profileRepository.findByUserId() для каждого поста
+        Profile authorProfile = profilesMap.get(post.getAuthorId());
+        return PostResponse.builder()
+                .id(post.getId())
+                .content(post.getContent())
+                .likesCount(likes)
+                .dislikesCount(dislikes)
+                .reactionType(myReaction)
+                .author(toProfileInPostDto(authorProfile))
+                .comments(post.getComments().stream()
+                        .map(c -> {
+                            // O(1)  профиль комментатора из той же Map
+                            Profile commentAuthor = profilesMap.get(c.getAuthorId());
+                            return new CommentResponse(c, toProfileInPostDto(commentAuthor));
+                        }).toList())
+                .createdAt(post.getCreatedAt() != null ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("d MMMM, HH:mm")) : "")
+                .imageUrl("/images/default-avatar.png")
+                .build();
+    }
+
+
+    public ProfileShortDto toProfileInPostDto(Profile profile) {
+        String name = profile.getFirstName() + " " + profile.getLastName();
+        String avatarUrl = "/images/default-avatar.png";
+        return new ProfileShortDto(profile.getUserId(), name, avatarUrl);
+    }  
+}
