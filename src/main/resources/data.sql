@@ -5,7 +5,7 @@ INSERT INTO users (username, email, password_hash, role, status)
 VALUES (
            'superadmin',
            'superadmin@example.com',
-           '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrqJxYVXe4q3L0Z7rGxL5N8XqPvT3eK', -- пароль: admin123
+           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
            'SUPER_ADMIN',
            'ACTIVE'
        );
@@ -26,7 +26,7 @@ INSERT INTO users (username, email, password_hash, role, status)
 VALUES (
            'moderator',
            'moderator@example.com',
-           '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrqJxYVXe4q3L0Z7rGxL5N8XqPvT3eK', -- пароль: admin123
+           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
            'MODERATOR',
            'ACTIVE'
        );
@@ -47,7 +47,7 @@ INSERT INTO users (username, email, password_hash, role, status)
 VALUES (
            'user',
            'user@example.com',
-           '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrqJxYVXe4q3L0Z7rGxL5N8XqPvT3eK', -- пароль: admin123
+           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
            'USER',
            'ACTIVE'
        );
@@ -68,7 +68,7 @@ INSERT INTO users (username, email, password_hash, role, status)
 VALUES (
            'friend',
            'friend@example.com',
-           '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrqJxYVXe4q3L0Z7rGxL5N8XqPvT3eK', -- пароль: admin123
+           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
            'USER',
            'ACTIVE'
        );
