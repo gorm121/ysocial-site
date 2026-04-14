@@ -90,6 +90,53 @@ public class PostService {
         return new PageImpl<>(dtos, pageable, totalElements);
     }
 
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getUserFeed(UserDetails userDetails, Long userId, int page, int size) {
+        User viewer = userService.getUserByUserDetails(userDetails);;
+
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+                        .and(Sort.by(Sort.Direction.DESC, "id"))
+        );
+        
+        // Если профиль закрытый, и мы не владелец профиля, и просто пользователь, то проверяем статус дружбы
+        if (profile.isPrivate() && !viewer.getId().equals(userId) && viewer.getRole() == UserRole.USER) {
+            Optional<Friendship> friendshipOpt = friendshipRepository.findFriendshipBetween(viewer.getId(), userId);
+            if (friendshipOpt.isEmpty() || friendshipOpt.get().getStatus() != FriendshipStatus.ACCEPTED) {
+                // Если пользователь не друг, отдаем пустой Page
+                return Page.empty(pageable);
+            }
+        }
+        
+        Page<Post> postsPage = postRepository.findByAuthorId(userId, pageable);
+
+        if (postsPage.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        List<Post> posts = postsPage.getContent();
+
+        Set<Long> userIdsToFetch = new HashSet<>();
+        userIdsToFetch.add(userId);
+        // Собираем всех пользователей которые присутствуют в комментах, чтобы потом одним запросом загрузить их профили
+        posts.forEach(post ->
+                post.getComments().forEach(comment -> userIdsToFetch.add(comment.getAuthorId()))
+        );
+
+        // Затем собираем их профили
+        Map<Long, Profile> profilesMap = profileRepository.findAllByUsersId(new ArrayList<>(userIdsToFetch))
+                .stream().collect(Collectors.toMap(Profile::getUserId, p -> p));
+        
+        List<PostResponse> dtos = posts.stream()
+                .map(post -> mapToDto(post, profilesMap, viewer.getId()))
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, postsPage.getTotalElements());
+    }
+
 
     private PostResponse mapToDto(Post post, Map<Long, Profile> profilesMap, Long currentUserId) {
         // Считаем реакции
