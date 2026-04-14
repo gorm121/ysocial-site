@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <head th:fragment="head(title, withCsrf)">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <th:block th:if="${withCsrf}">
+            <meta name="_csrf" th:content="${_csrf.token}"/>
+            <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        </th:block>
+        <title th:text="${title}">Ysocial</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/style/style.css}">
+        <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    </head>
+
+    <header th:fragment="auth-header" class="app-header">
+        <div class="header-logo"><div class="logo-icon small">Y</div></div>
+        <div class="header-avatar"></div>
+    </header>
+
+    <header th:fragment="main-header(avatarUrl)" class="app-header sticky-header">
+        <div class="header-left">
+            <a th:href="@{/posts/feed}" style="text-decoration: none;">
+                <div class="logo-circle small">
+                    <span class="logo-text-small">Y</span>
+                </div>
+            </a>
+        </div>
+        <div class="header-center"></div>
+        <div class="header-right" style="position: relative;">
+            <div class="avatar-container">
+                <div id="userAvatar" class="header-avatar" 
+                     th:style="'background-image: url(' + ${avatarUrl} + ');'">
+                </div>
+                <div id="userDropdown" class="dropdown-menu">
+                    <form th:action="@{/logout}" method="post" style="margin: 0;">
+                        <button type="submit" class="dropdown-item danger" style="width: 100%; border: none; background: none; text-align: left; font-family: inherit; font-size: inherit; cursor: pointer;">
+                            <span>🚪</span> Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <aside th:fragment="sidebar(activePage)" class="sidebar">
+        <nav class="nav-menu">
+            <a th:href="@{/profiles}" class="nav-item" th:classappend="${activePage == 'profile'} ? 'active' : ''">
+                <span class="icon">👤</span> Мой профиль
+            </a>
+            <a th:href="@{/posts/feed}" class="nav-item" th:classappend="${activePage == 'feed'} ? 'active' : ''">
+                <span class="icon">📰</span> Лента
+            </a>
+            <a th:href="@{/profiles/people}" class="nav-item" th:classappend="${activePage == 'people'} ? 'active' : ''">
+                <span class="icon">🔎</span> Люди
+            </a>
+            <a th:href="@{/messages}" class="nav-item" th:classappend="${activePage == 'messages'} ? 'active' : ''">
+                <span class="icon">💬</span> Сообщения
+            </a>
+            <a th:href="@{/friends}" class="nav-item" th:classappend="${activePage == 'friends'} ? 'active' : ''">
+                <span class="icon">🤝</span> Друзья
+            </a>
+            <a href="#" class="nav-item" th:classappend="${activePage == 'settings'} ? 'active' : ''">
+                <span class="icon">⚙️</span> Настройки
+            </a>
+        </nav>
+    </aside>
+
+    <th:block th:fragment="htmx-scripts">
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script>
+            document.body.addEventListener('htmx:configRequest', (event) => {
+                const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+                const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+                if (csrfHeaderMeta && csrfTokenMeta) {
+                    event.detail.headers[csrfHeaderMeta.content] = csrfTokenMeta.content;
+                }
+            });
+
+            // Функция для превращения текста-ссылки в кликабельный тег <a>
+            function linkifyElements() {
+                document.querySelectorAll('.post-text, .comment-text').forEach(el => {
+                    if (el.dataset.linkified) return;
+                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                    let html = el.innerHTML;
+                    if (urlRegex.test(html)) {
+                        el.innerHTML = html.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#007bff; text-decoration:underline;">$1</a>');
+                    }
+                    el.dataset.linkified = 'true';
+                });
+            }
+
+            // Запускаем при обычной загрузке страницы
+            document.addEventListener('DOMContentLoaded', linkifyElements);
+            // Запускаем каждый раз, когда HTMX подгружает новые посты/комментарии
+            document.body.addEventListener('htmx:load', linkifyElements);
+        </script>
+    </th:block>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <head th:fragment="head(title, withCsrf)">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <th:block th:if="${withCsrf}">
+            <meta name="_csrf" th:content="${_csrf.token}"/>
+            <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        </th:block>
+        <title th:text="${title}">Ysocial</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/style/style.css}">
+        <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    </head>
+
+    <header th:fragment="auth-header" class="app-header">
+        <div class="header-logo"><div class="logo-icon small">Y</div></div>
+        <div class="header-avatar"></div>
+    </header>
+
+    <header th:fragment="main-header(avatarUrl)" class="app-header sticky-header">
+        <div class="header-left">
+            <a th:href="@{/posts/feed}" style="text-decoration: none;">
+                <div class="logo-circle small">
+                    <span class="logo-text-small">Y</span>
+                </div>
+            </a>
+        </div>
+        <div class="header-center"></div>
+        <div class="header-right" style="position: relative;">
+            <div class="avatar-container">
+                <div id="userAvatar" class="header-avatar" 
+                     th:style="'background-image: url(' + ${avatarUrl} + ');'">
+                </div>
+                <div id="userDropdown" class="dropdown-menu">
+                    <form th:action="@{/logout}" method="post" style="margin: 0;">
+                        <button type="submit" class="dropdown-item danger" style="width: 100%; border: none; background: none; text-align: left; font-family: inherit; font-size: inherit; cursor: pointer;">
+                            <span>🚪</span> Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <aside th:fragment="sidebar(activePage)" class="sidebar">
+        <nav class="nav-menu">
+            <a th:href="@{/profiles}" class="nav-item" th:classappend="${activePage == 'profile'} ? 'active' : ''">
+                <span class="icon">👤</span> Мой профиль
+            </a>
+            <a th:href="@{/posts/feed}" class="nav-item" th:classappend="${activePage == 'feed'} ? 'active' : ''">
+                <span class="icon">📰</span> Лента
+            </a>
+            <a th:href="@{/profiles/people}" class="nav-item" th:classappend="${activePage == 'people'} ? 'active' : ''">
+                <span class="icon">🔎</span> Люди
+            </a>
+            <a th:href="@{/messages}" class="nav-item" th:classappend="${activePage == 'messages'} ? 'active' : ''">
+                <span class="icon">💬</span> Сообщения
+            </a>
+            <a th:href="@{/friends}" class="nav-item" th:classappend="${activePage == 'friends'} ? 'active' : ''">
+                <span class="icon">🤝</span> Друзья
+            </a>
+            <a href="#" class="nav-item" th:classappend="${activePage == 'settings'} ? 'active' : ''">
+                <span class="icon">⚙️</span> Настройки
+            </a>
+        </nav>
+    </aside>
+
+    <th:block th:fragment="htmx-scripts">
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script>
+            document.body.addEventListener('htmx:configRequest', (event) => {
+                const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+                const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+                if (csrfHeaderMeta && csrfTokenMeta) {
+                    event.detail.headers[csrfHeaderMeta.content] = csrfTokenMeta.content;
+                }
+            });
+
+            // Функция для превращения текста-ссылки в кликабельный тег <a>
+            function linkifyElements() {
+                document.querySelectorAll('.post-text, .comment-text').forEach(el => {
+                    if (el.dataset.linkified) return;
+                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                    let html = el.innerHTML;
+                    if (urlRegex.test(html)) {
+                        el.innerHTML = html.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#007bff; text-decoration:underline;">$1</a>');
+                    }
+                    el.dataset.linkified = 'true';
+                });
+            }
+
+            // Запускаем при обычной загрузке страницы
+            document.addEventListener('DOMContentLoaded', linkifyElements);
+            // Запускаем каждый раз, когда HTMX подгружает новые посты/комментарии
+            document.body.addEventListener('htmx:load', linkifyElements);
+        </script>
+    </th:block>
+
+</body>
+</html>

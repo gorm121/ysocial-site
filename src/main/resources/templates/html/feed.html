@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{html/layout :: head('Лента Ysocial', true)}"></head>
+<body>
+
+    <header th:replace="~{html/layout :: main-header(${avatarUrl})}"></header>
+
+    <div class="main-layout">
+        
+        <aside th:replace="~{html/layout :: sidebar('feed')}"></aside>
+
+        <main class="feed-container" id="feed-container">
+            <th:block th:fragment="post-chunk" th:if="${posts != null}">
+                <div th:each="post : ${posts}" class="post-card">
+                    <div class="post-content-col"> 
+                        <div class="post-header">
+                            <a th:href="@{/profiles/{userId}(userId=${post.author.id})}"> 
+                                <div class="user-avatar" th:style="'background-image: url(' + ${post.author.avatarUrl} + ')'"></div>
+                             </a> 
+                            <div class="user-info">                    
+                                <div class="user-name" th:text="${post.author.name}"></div>    
+                            </div>    
+                                  
+                            <div style="margin-left: auto;" 
+                                th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'', ''MODERATOR'')')}">
+                                <button class="action-btn" 
+                                        style="color: #f00;"
+                                        type="button"
+                                        th:hx-delete="@{/posts/{postId}(postId=${post.id})}">
+                                    🗑
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <img th:if="${post.imageUrl != null and !#strings.isEmpty(post.imageUrl)}" th:src="${post.imageUrl}" class="post-image">
+
+                        <div class="post-text" th:text="${post.content}"></div>
+
+                        <div class="post-footer">
+                            <div th:text="${post.createdAt}"></div>
+                            <div th:replace="~{html/post_components :: vote-fragment(post=${post})}"></div>
+                        </div>
+                    </div>
+
+                    <div class="post-comments-col">
+                        <div class="comments-header">Комментарии</div>
+                        <!-- проходимся по всем комментам и через th:bloc и th:replace отрисовываем их через фрагмент comment-item,
+                        который находится в этом же файле ниже (хз как еще это сделать).
+                        th:id="'comments-list-' + ${post.id} нужно чтобы потом htmx понял к какому посту и 
+                        в следствии к какому списку комментов относится созданный коммент-->
+                        <div class="comments-list" th:id="'comments-list-' + ${post.id}">
+                            <th:block th:each="c : ${post.comments}">
+                                <div th:replace="~{html/post_components :: comment-item(comment=${c})}"></div>
+                            </th:block>
+                        </div>
+                        <!-- поле для отправки коммента, кидаем POST-запрос по id поста,
+                        и ждем ответ во фрагмент comment-list, чтобы было понятно какой коммент к какому именно посту добавить,
+                        но отрисовываем мы только фрагмент comment-item (его же и кидаем с бэка) в начале списка так как hx-swap="afterbegin".
+                        то есть крч говорим к какому сипску коментов получить коммент и отрисвать только этот созданный коммент в начале списка.  -->
+                        <div class="comment-input-area">
+                            <input type="text" 
+                                name="text" 
+                                class="comment-input" 
+                                placeholder="Написать комментарий..."
+                                th:hx-post="@{/post/{postId}/comments(postId=${post.id})}"
+                                th:hx-target="'#comments-list-' + ${post.id}"
+                                hx-trigger="keyup[key=='Enter']" 
+                                hx-swap="afterbegin"
+                                hx-on::after-request="this.value = ''"> 
+                        </div>
+                    </div>
+                </div> 
+                <!--    hx-swap="outerHTML" вырежет и заменит весь див в котором он находися на новый. 
+                            тригер ждет пока долистаем до него.
+                            th:if="${posts.hasNext()}" проверяет есть ли еще страницы, 
+                            нам с бэка приходит Page<PostResponse>  и там есть метод hasNext() который возвращает true если есть следующая страница, 
+                            если false то блок не отрисовывается и тригера нет, 
+                            если есть  то отрисовывает и ждет тригера.
+                            насчет атрибута th:attr="hx-get=@{/posts/feed(page=${posts.number + 1}, size=${size})}": 
+                            когда мы отдаем эту html странцу, то в ней уже будет hx-get с правильными параметрами для следующей страницы,
+                            и когда пользователь долистает до этого блока, 
+                            то htmx сделает запрос по этому адресу, бэк отдаст новый кусок html с новыми постами и новым блоком для следующей страницы,
+                            и таккрч по кругу пока не не будет false у hasnext . 
+
+                            типа вот были 0-10 постов, затем долистали до сюда, htmx затригерился, и сделал запрос,
+                            затем там на бэке thymeleaf начал формировать новый фрагмет post-chunk с постами 11-20,
+                            htmx помнит откуда его вызвали
+                            и через hx-swap="outerHTML" он заменяет наш лоадер на фрагмент в конце которого будет 
+                            такой же лоадер (при hasNext() == true) для следующей страницы 21-30, и так далее.
+
+                            th:block получается вот первые 10 постов, затем листаем до лоадера, идет запрос, 
+                            и нам кидают просто th:block (th:fragment = post-chunk) со след 10 постами но th:block просто пропадает 
+                            -->
+                <div th:if="${posts.hasNext()}"
+                    hx-trigger="revealed"
+                    hx-swap="outerHTML"
+                    th:hx-get="@{/posts/feed(page=${posts.number + 1}, size=${size})}">
+                    <div class="loader">Загрузка старых постов...</div>
+                </div>
+                <div th:if="${!posts.hasNext()}" class="loader">Постов больше нет</div>
+            </th:block>        
+        </main>
+    </div>
+    <th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+
+                    <!-- здесь кнопкам даем id через th:id="'vote-block-' + ${post.id}" , 
+                        чтобы наш любими htmx знал какой div ему заменить (по фрагменту - th:fragment="vote-fragment")
+                        ну он шлет запрос и с бэка отдаем данные нужного нам поста еще раз но уже с другими значениями лайка диза.
+                        если еще не пон, то условно если у нас 10 постов, то и таких th:fragment="vote-fragment" у нас тоже 10 (ну для каждого поста)
+                        и благодаря th:id и в следствии hx-target мы знаем какой именно нужно фрагмент (див получается) обновить с каким именно th:id,
+                        бэк тут ваще не понимает, он просто отдает то что его попросили -->
+                                
+                       <!-- КНОПКИ ЛАЙКА И ДИЗЛАЙКА-->
+    <div class="post-actions" th:id="'vote-block-' + ${post?.id}" th:fragment="vote-fragment(post)" th:if="${post != null}">
+        <button class="action-btn post-like"
+                th:hx-post="@{/posts/{id}/reaction(id=${post.id}, type='LIKE')}"
+                th:hx-target="'#vote-block-' + ${post.id}"
+                hx-swap="outerHTML" 
+                th:classappend="${post.reactionType != null and post.reactionType.name() == 'LIKE'} ? 'active' : ''">
+            👍 <span th:text="${post.likesCount ?: 0}"></span>
+        </button>
+        <button class="action-btn post-dislike"
+                th:hx-post="@{/posts/{id}/reaction(id=${post.id}, type='DISLIKE')}"
+                th:hx-target="'#vote-block-' + ${post.id}"
+                hx-swap="outerHTML" 
+                th:classappend="${post.reactionType != null and post.reactionType.name() == 'DISLIKE'} ? 'active' : ''">
+            👎 <span th:text="${post.dislikesCount ?: 0}"></span>
+        </button>
+    </div>
+
+    <!-- формально это наша функция-скелет которая принимает коммент и заполняет див -->
+    <div th:fragment="comment-item(comment)" th:if="${comment != null}" class="comment-item fade-in" th:id="'comment-' + ${comment.id}">
+        <a th:href="@{/profiles/{id}(id=${comment.author.id})}">
+            <div class="comment-avatar" th:style="'background-image: url(' + ${comment.author.avatarUrl} + ')'">  
+            </div>
+        </a>
+        <div class="comment-body">
+            <div class="comment-bubble">
+                <span class="comment-author" th:text="${comment.author.name}"></span>
+                <div class="comment-text" th:text="${comment.text}"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
