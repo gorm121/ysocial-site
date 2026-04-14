@@ -44,4 +44,24 @@ public class PostController {
         return "html/feed";
     }
 
+    @GetMapping
+    public String getFeedUser(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("userId") UUID userId, 
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            Model model
+    ) {
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+
+        Page<PostResponse> postPage = postService.getUserFeed(userDetails, userId, page, size);
+//        ProfileDto profileDto = profileService.getProfileById(userDetails, userId);
+        model.addAttribute("posts", postPage);
+        model.addAttribute("profileUserId", userId);
+        model.addAttribute("isOwnProfile", true); // true временно
+
+        return "html/profile :: post-chunk";
+    }
+
 }
