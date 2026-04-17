@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
+<head th:replace="~{html/layout :: head('Профиль Ysocial', true)}"></head>
+<body>
+
+    <header th:replace="~{html/layout :: main-header(avatarUrl=${profile != null ? profile.avatarUrl : '/images/default-avatar.png'})}"></header>
+
+        <div class="main-layout">
+            <aside th:replace="~{html/layout :: sidebar(${isOwnProfile} ? 'profile' : null)}"></aside>
+
+            <main class="profile-container">
+                <div class="profile-card" th:if="${profile != null}">
+                    <div class="profile-header-info">
+                        <div class="profile-avatar-large" id="profileAvatar" 
+                            th:style="'background-image: url(' + ${profile.avatarUrl} + ')'">
+                        </div>
+                        <div class="profile-info-text">
+                            <div sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="admin-info-badge">
+                                <span style="color: #ff6b6b; font-weight: bold;" 
+                                    th:text="'Текущая роль: ' + ${profile != null && profile.userRole != null ? profile.userRole : 'USER'}"></span>
+                            </div>
+                            <div class="profile-name-row">
+                                <h1 id="profileName" th:text="${profile.firstName + ' ' + profile.lastName ?: 'Не указано'}"></h1>
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <th:block th:if="${!isOwnProfile}" th:fragment="friend-button(status, userId)">
+                                        <button th:if="${status == null}" 
+                                                class="friend-btn"
+                                                th:attr="hx-post=@{/friends/request/{id}/send(id=${userId})}"
+                                                hx-target="this" 
+                                                hx-swap="outerHTML">
+                                            Добавить в друзья
+                                        </button>
+                                        <button th:if="${status != null && #strings.toString(status) == 'PENDING'}" 
+                                                class="friend-btn secondary" 
+                                                disabled>
+                                            Заявка отправлена
+                                        </button>
+                                        <button th:if="${status != null and #strings.toString(status) == 'RECEIVED'}" 
+                                                class="friend-btn"
+                                                style="background-color: #2ecc71;" 
+                                                th:attr="hx-post=@{/friends/request/{id}/accept(id=${userId})}"
+                                                hx-target="this" 
+                                                hx-swap="outerHTML">
+                                            Принять заявку
+                                        </button>
+                                        <button th:if="${status != null &&  #strings.toString(status) == 'ACCEPTED'}" 
+                                                class="friend-btn secondary"
+                                                th:attr="hx-delete=@{/friends/{id}/remove(id=${userId})}"
+                                                hx-target="this" 
+                                                hx-swap="outerHTML">
+                                            Удалить из друзей
+                                        </button>
+                                        <a th:if="${status != null && #strings.toString(status) == 'ACCEPTED'}"
+                                            th:href="@{/messages/{id}(id=${userId})}"
+                                            class="friend-btn secondary">
+                                            Написать сообщение
+                                        </a>
+                                    </th:block>
+                                    <button th:if="${isOwnProfile}" 
+                                            class="edit-profile-btn"
+                                            hx-get="/profiles/edit-form" 
+                                            hx-target="body" 
+                                            hx-swap="beforeend">
+                                        Редактировать профиль ✎
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="profile-bio" th:id="profileBio" th:text="${profile.bio ?: ''}"></p>
+                            <p class="profile-bio">Город: <span id="displayCity" th:text="${profile.city ?: 'не указан'}">не указан</span></p>
+                            <p class="profile-bio">Дата рождения: <span id="displayBirthday" th:text="${profile.birthDate ?: 'не указана'}">не указана</span></p>
+
+                            
+                            <div class="profile-stats" >
+                                <div class="stat-item">Друзей: <strong id="friendsCount" th:text="${profile.countFriends ?: 0}">0</strong></div>
+                            </div>
+
+
+<!--                            hx-get="/profiles/create-form"-->
+                            <button th:if="${isOwnProfile}" 
+                                    id="openCreatePostBtn" 
+                                    class="publish-btn"
+
+                                    hx-target="body"
+                                    hx-swap="beforeend">
+                                    + опубликовать</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${profile == null}">
+                    <p>Профиль не найден</p>
+                </div>
+                <div id="feed-container">
+                <!-- здесь в профиле по сути тоже самое что и на странице ленты, если вдруг профиль не пришел или что то случилось
+                то через проверку profile == null (!) пишем что нет профиля и не делаем никакой запрос.
+                если все гуд, то делаем запрос и просим у thymeleaf нарисовать нам цикл посто  class="post-card"
+                после отрисовки он кидает их нам htmx помнит откуда кидали запрос и благодаря hx-swap="outerHTML"> заменяет наш
+                начальный лоадер на посты и в конце у th:fragment="post-chunk" прикрепляется почти такой же лодаер только
+                для того чтобы при прокрутке посты также отрисовывались-->
+                <div th:if="${profile != null}"
+                    th:attr="hx-get=@{/posts(userId=${profile.id}, page=0, size=10)}"
+                    hx-trigger="load delay:100ms"
+                    hx-swap="outerHTML">
+                    <div class="loader">Загрузка ленты пользователя...</div>
+                </div>
+
+                    <th:block th:id="postChunk" th:fragment="post-chunk" th:if="${posts != null}">
+                        <div th:each="post : ${posts}" class="post-card">
+                            <div class="post-content-col">
+                                <div class="post-header">
+                                    <a th:href="@{/profiles/{userId}(userId=${post.author.id})}">    
+                                        <div class="user-avatar" th:style="'background-image: url(' + ${post.author.avatarUrl} + ')'"></div>
+                                    </a>   
+                                    <div class="user-info">                    
+                                        <div class="user-name" th:text="${post.author.name}"></div>
+                                    </div>        
+                                    <div style="margin-left: auto;"
+                                        th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'', ''MODERATOR'')') or isOwnProfile}">
+                                        <button class="action-btn"
+                                                style="color: #f00;"
+                                                type="button"
+                                                th:hx-delete="@{/posts/{postId}(postId=${post.id})}" >
+                                            🗑
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <img th:if="${!#strings.isEmpty(post.imageUrl)}" 
+                                    th:src="${post.imageUrl}" 
+                                    class="post-image" 
+                                    style="width: 100%; height: 300px; object-fit: cover;">
+                                <div class="post-text" th:text="${post.content}"></div>
+
+                                <!-- сюда вставляем наши лукасики заменяя это по фрагменту который в post_components.
+                                то есть идет идет доходит до сюда, видит replace идет ищет фрагмент и 
+                                заменяет его с нужными данными поста (тут если что мы в цикле постов)-->
+                                <div class="post-footer">
+                                    <div class="post-date" th:text="${post.createdAt}"></div>
+                                    <div th:replace="~{html/post_components :: vote-fragment(post=${post})}"></div>
+                                </div>
+                            </div>
+                                                                            <!-- можно сказать что мы вызываем функцию, которая рисует нам то что нужно -->
+                            <div class="post-comments-col">
+                                <div class="comments-header">Комментарии</div>
+                                <!-- с комментами то же самое что и с лайками -->
+                                <div class="comments-list" th:id="'comments-list-' + ${post.id}">
+                                    <th:block th:each="c : ${post.comments}">
+                                        <div th:replace="~{html/post_components :: comment-item(comment=${c})}"></div>
+                                    </th:block>
+                                </div>
+
+                                <div class="comment-input-area">
+                                    <input  type="text"
+                                            name="text"
+                                            class="comment-input"
+                                            placeholder="Написать комментарий..."
+                                            th:hx-post="@{/post/{postId}/comments(postId=${post.id})}"
+                                            th:hx-target="'#comments-list-' + ${post.id}"
+                                            hx-trigger="keyup[key=='Enter']"
+                                            hx-swap="afterbegin"
+                                            hx-on::after-request="this.value = ''">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${posts != null and posts.hasNext()}"
+                            hx-trigger="revealed"
+                            hx-swap="outerHTML"
+                            th:attr="hx-get=@{/posts(userId=${profileUserId},page=${posts.number + 1}, size=${size})}">
+                            <div class="loader">Загрузка ленты пользователя...</div>
+                        </div>
+                        <div th:if="${posts != null and !posts.hasNext()}" class="loader">Постов больше нет</div>
+                    </th:block>
+                </div>
+            </main>
+        </div>
+
+        <th:block th:if="${false}">
+            <div th:fragment="edit-modal-fragment" id="editModal" class="login-wrapper">
+                <div class="login-card">
+                    <h2 class="form-title">Редактировать профиль</h2>
+                    <form hx-put="/profiles" 
+                        hx-encoding="multipart/form-data"
+                        hx-swap="innerHTML"
+                        th:object="${profile}">
+
+                        <div class="input-group">
+                            <input type="text" th:field="*{firstName}" placeholder="Имя">
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" th:field="*{lastName}" placeholder="Фамилия">
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" th:field="*{city}" placeholder="Город">
+                        </div>
+
+                        <div class="input-group">
+                            <textarea th:field="*{bio}" class="modal-textarea" placeholder="О себе" style="height: 100px; width: 100%; resize: vertical;"></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Дата рождения:</label>
+                            <input type="date" th:field="*{birthDate}">
+                        </div>
+                        <div class="input-group">
+                            <label>
+                                <input type="checkbox" th:field="*{privateProfile}"> Приватный профиль
+                            </label>
+                        </div>
+
+                        <div class="file-upload-area" onclick="document.getElementById('avatarInput').click()" 
+                            style="cursor: pointer; border: 2px dashed #ddd; padding: 15px; text-align: center; margin-bottom: 15px;">
+                            <label class="file-label" id="avatarLabel">📸 Нажмите, чтобы выбрать новое фото</label>
+                            <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" 
+                                onchange="document.getElementById('avatarLabel').innerText = 'Файл выбран: ' + this.files[0].name">
+                        </div>
+
+                        <div class="actions">
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <button type="button" 
+                                    class="btn btn-secondary" 
+                                    onclick="document.getElementById('editModal').remove()">
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            </th:block>
+
+
+        <th:block th:if="${false}">
+            <div th:fragment="create-post-modal-fragment" id="createPostModal" class="login-wrapper">
+                <div class="login-card">
+                    <h2 class="form-title">Новый пост</h2>
+                    
+                    <form th:action="@{/posts}" 
+                            method="post"
+                            enctype="multipart/form-data">
+                            
+                            <div class="input-group">
+                                <textarea id="newPostContent" 
+                                        name="content" 
+                                        class="modal-textarea" 
+                                        maxlength="255" 
+                                        placeholder="Что у вас нового? (до 255 символов)"></textarea>
+                            </div>
+                            
+                            <div class="file-upload-area" onclick="document.getElementById('imageInput').click()" 
+                                style="cursor: pointer; border: 2px dashed #ddd; padding: 15px; text-align: center; margin-bottom: 15px;">
+                                <label class="file-label" id="imageLabel">📸 Нажмите чтобы загрузить фото для поста</label>
+                                <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;" 
+                                    onchange="document.getElementById('imageLabel').innerText = 'Файл выбран: ' + this.files[0].name">
+                            </div>
+                            
+                            <div id="postError" class="error-msg" style="display:none;"></div>
+                            
+                            <div class="actions">
+                                <button type="submit" id="createPostBtn" class="btn btn-primary">Опубликовать</button>
+                                <button type="button" id="closePostModalBtn" 
+                                        class="btn btn-secondary"
+                                        onclick="document.getElementById('createPostModal').remove()">
+                                    Отмена
+                                </button>
+                            </div>
+                        </form>
+                    
+                </div>
+            </div>
+        </th:block>
+        <th:block th:if="${false}">
+            <th:block th:fragment="reload-script">
+                <script>
+                    window.location.reload(); 
+                </script>
+            </th:block>
+        </th:block>
+    <th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+</body>
+</html>

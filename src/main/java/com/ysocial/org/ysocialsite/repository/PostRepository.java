@@ -1,12 +1,15 @@
 package com.ysocial.org.ysocialsite.repository;
 
 import com.ysocial.org.ysocialsite.entites.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public interface PostRepository extends ListCrudRepository<Post, Long>, PagingAndSortingRepository<Post, Long> {
@@ -31,5 +34,7 @@ public interface PostRepository extends ListCrudRepository<Post, Long>, PagingAn
 
     @Query("SELECT * FROM posts WHERE id IN (:ids) ORDER BY created_at DESC, id DESC")
     List<Post> findAllByIdsSorted(@Param("ids") List<Long> ids);
+
+    Page<Post> findByAuthorId(Long authorId, Pageable pageable);
 
 }
