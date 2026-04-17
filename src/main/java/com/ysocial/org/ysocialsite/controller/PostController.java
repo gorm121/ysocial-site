@@ -47,7 +47,7 @@ public class PostController {
     @GetMapping
     public String getFeedUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam("userId") UUID userId, 
+            @RequestParam("userId") Long userId,
             @RequestParam("page") int page,
             @RequestParam("size") int size,
             Model model
