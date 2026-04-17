@@ -92,6 +92,43 @@ body {
     align-items: center;
 }
 
+.avatar-container { position: relative; display: inline-block; }
+.dropdown-menu {
+    /* Меняем display: none на управление видимостью и прозрачностью */
+    opacity: 0;
+    visibility: hidden;
+
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 150px;
+    background-color: #252525;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 1000;
+    transform-origin: top right;
+
+    /* Плавность скрытия: добавляем задержку в 0.3 секунды перед закрытием */
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    transition-delay: 0.3s;
+
+    transform: scale(0.9); /* Небольшое уменьшение для красивого эффекта */
+}
+
+/* При наведении на аватар или САМО МЕНЮ */
+.avatar-container:hover .dropdown-menu,
+.dropdown-menu:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+
+    /* При наведении задержка НЕ нужна — меню откроется мгновенно */
+    transition-delay: 0s;
+}
+
+
 
 /*логин и рег*/
 .login-wrapper {
@@ -120,7 +157,7 @@ body {
     text-align: center;
 }
 
-/*вводы*/
+
 .input-group { margin-bottom: 20px; }
 .actions { margin-top: 30px; display: flex; flex-direction: column; gap: 15px; }
 .brand-logo { display: flex; justify-content: center; margin-bottom: 20px; }
@@ -130,6 +167,21 @@ body {
 .step-desc { color: #888; font-size: 14px; margin-top: -20px; margin-bottom: 20px; }
 input#code { text-align: center; letter-spacing: 8px; font-size: 20px; font-weight: bold; }
 
+/*логотипы*/
+.logo-circle.small {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logo-text-small {
+    color: var(--accent-blue);
+    font-weight: 800;
+    font-size: 20px;
+}
 
 /*обшие вводы*/
 input {
@@ -151,6 +203,43 @@ input {
 .btn-primary:hover { background: #eee; }
 .btn-secondary { background: #383838; color: white; }
 .btn-secondary:hover { background: #454545; }
+
+/* Кнопки друзей */
+.friend-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.friend-btn:hover {
+    background-color: #354a9c;
+}
+
+.friend-btn.secondary {
+    background-color: var(--bg-input);
+    color: #e0e0e0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 0;
+}
+
+.friend-btn.secondary:hover {
+    background-color: #454545;
+    color: white;
+}
+
+/* Стили для неактивной кнопки  */
+.friend-btn:disabled,
+.friend-btn.secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none; /* Защита от лишних кликов */
+}
 
 
 .action-btn.active {
@@ -186,6 +275,77 @@ input {
     color: white;
 }
 
+
+/*меню*/
+.sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    color: #aaa;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 16px;
+    transition: all 0.2s;
+    font-size: 16px;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.nav-item.active {
+    background-color: var(--bg-card);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.nav-item .icon {
+    margin-right: 15px;
+    width: 24px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e0e0e0;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-item.danger {
+    color: #ff6b6b;
+}
+
+.dropdown-item.danger:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+}
 
 /*сетка страницы*/
 .main-layout {
@@ -239,6 +399,7 @@ input {
     margin-bottom: 20px;
 }
 
+.loader { text-align: center; padding: 30px; color: #666; font-size: 14px; }
 
 .user-info {
   display: flex;
@@ -408,4 +569,127 @@ input {
 .comment-input:focus {
     border-color: #555;
     background-color: #333;
+}
+
+
+
+
+
+
+
+
+/* профиль*/
+.profile-container {
+    max-width: 1100px;
+}
+
+.profile-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-card);
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.profile-header-info {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.profile-avatar-large {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 4px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+}
+
+.profile-info-text {
+    flex-grow: 1;
+}
+
+.profile-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.profile-name-row h1 {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.profile-bio {
+    color: #888;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.stat-item {
+    font-size: 18px;
+    color: #ccc;
+}
+
+.stat-item strong {
+    color: white;
+    margin-right: 5px;
+}
+
+.publish-btn {
+    background-color: #383838;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.publish-btn:hover {
+    background-color: #454545;
+}
+
+
+.file-upload-area {
+    margin-top: 15px;
+    border: 1px dashed #555;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.file-upload-area:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.file-label {
+    cursor: pointer;
+    color: var(--accent-blue);
+    font-weight: 500;
+}
+
+.edit-profile-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.edit-profile-btn:hover {
+    color: white;
 }

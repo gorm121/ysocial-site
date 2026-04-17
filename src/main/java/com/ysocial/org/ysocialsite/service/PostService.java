@@ -6,6 +6,7 @@ import com.ysocial.org.ysocialsite.dto.response.PostResponse;
 import com.ysocial.org.ysocialsite.entites.*;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.enums.ReactionType;
+import com.ysocial.org.ysocialsite.enums.UserRole;
 import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
 import com.ysocial.org.ysocialsite.repository.PostRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;
