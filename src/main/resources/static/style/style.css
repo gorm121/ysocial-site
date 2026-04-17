@@ -432,18 +432,12 @@ input {
     color: #e0e0e0;
     font-size: 15px;
 
-    /* 1. Чтобы текст не «прилипал» к краям и не ломал верстку */
     overflow-wrap: break-word; 
     word-wrap: break-word;
-    
-    /* 2. Самое важное: разрешаем перенос только там, где реально нужно */
-    /* break-word лучше чем break-all, так как он пытается сначала перенести слово целиком */
-    word-break: break-word; 
 
-    /* 3. Чтобы правый край был ровным (как в книгах) */
+    word-break: break-word;
     text-align: justify;
-    
-    /* 4. Гифенция (переносы со значком дефиса) — сделает текст «красивее» */
+
     hyphens: auto;
     -webkit-hyphens: auto;
 }
