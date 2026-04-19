@@ -1,6 +1,7 @@
 package com.ysocial.org.ysocialsite.controller;
 
 import com.ysocial.org.ysocialsite.dto.response.PostResponse;
+import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.service.PostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -62,6 +63,18 @@ public class PostController {
         model.addAttribute("isOwnProfile", true); // true временно
 
         return "html/profile :: post-chunk";
+    }
+    
+    @PostMapping("/{postId}/reaction")
+    public String reactToPost(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long postId,
+            @RequestParam ReactionType type,
+            Model model
+    ) {
+        PostResponse result = postService.processReaction(userDetails, postId, type);
+        model.addAttribute("post", result);
+        return "html/post_components :: vote-fragment";
     }
 
 }
