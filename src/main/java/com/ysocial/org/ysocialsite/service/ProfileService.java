@@ -3,6 +3,7 @@ package com.ysocial.org.ysocialsite.service;
 
 import com.ysocial.org.ysocialsite.dto.ProfileDto;
 import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
+import com.ysocial.org.ysocialsite.dto.request.UpdateProfileRequest;
 import com.ysocial.org.ysocialsite.entites.Friendship;
 import com.ysocial.org.ysocialsite.entites.Profile;
 import com.ysocial.org.ysocialsite.entites.User;
@@ -12,18 +13,17 @@ import com.ysocial.org.ysocialsite.enums.UserRole;
 import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -42,13 +42,13 @@ public class ProfileService {
         this.userService = userService;
     }
 
-    public ProfileDto getMyProfile(UserDetails userDetails) {
+    public ProfileDto getMyProfile(CustomUserDetails userDetails) {
         User user = userService.getUserByUserDetails(userDetails);
         Long friendsCount = friendshipRepository.countFriendshipByUsersAndStatus(user.getId(), user.getId(), FriendshipStatus.ACCEPTED);
         return mapToDto(user.getProfile(), friendsCount, true, null, user.getRole());
     }
 
-     public ProfileDto getProfileById(UserDetails userDetails, UUID id) {
+     public ProfileDto getProfileById(CustomUserDetails userDetails, Long id) {
         User viewer = userService.getUserByUserDetails(userDetails);
 
         User user = userRepository.findById(id)
@@ -84,6 +84,29 @@ public class ProfileService {
         }
 
         return mapToDto(profile, friendsCount, isOwnProfile, frontendStatus, user.getRole());
+    }
+
+    @Transactional
+    public void updateProfile(CustomUserDetails userDetails,
+                              UpdateProfileRequest request,
+                              MultipartFile avatar) {
+
+        User currentUser = userService.getUserByUserDetails(userDetails);
+
+        Profile profile = currentUser.getProfile();
+
+        if (avatar != null && !avatar.isEmpty()) {
+            profile.setAvatarUrl(null); // временно
+        }
+
+        profile.setFirstName(request.getFirstName());
+        profile.setLastName(request.getLastName());
+        profile.setBio(request.getBio());
+        profile.setCity(request.getCity());
+        profile.setBirthDate(request.getBirthDate());
+        profile.setPrivate(request.isPrivateProfile());
+
+        userRepository.save(currentUser);
     }
 
 

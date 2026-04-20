@@ -73,13 +73,10 @@
                             <div class="profile-stats" >
                                 <div class="stat-item">Друзей: <strong id="friendsCount" th:text="${profile.countFriends ?: 0}">0</strong></div>
                             </div>
-
-
-<!--                            hx-get="/profiles/create-form"-->
                             <button th:if="${isOwnProfile}" 
                                     id="openCreatePostBtn" 
                                     class="publish-btn"
-
+                                    hx-get="/profiles/create-form"
                                     hx-target="body"
                                     hx-swap="beforeend">
                                     + опубликовать</button>
