@@ -8,11 +8,12 @@ import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.enums.UserRole;
 import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
+import com.ysocial.org.ysocialsite.repository.PostReactionRepository;
 import com.ysocial.org.ysocialsite.repository.PostRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;
+import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,20 +27,22 @@ public class PostService {
     private final PostRepository postRepository;
     private final FriendshipRepository friendshipRepository;
     private final ProfileRepository profileRepository;
+    private final PostReactionRepository postReactionRepository;
     
     private final UserService userService;
 
-    public PostService(PostRepository postRepository, FriendshipRepository friendshipRepository, ProfileRepository profileRepository, UserService userService) {
+    public PostService(PostRepository postRepository, FriendshipRepository friendshipRepository, ProfileRepository profileRepository, PostReactionRepository postReactionRepository, UserService userService) {
         this.postRepository = postRepository;
         this.friendshipRepository = friendshipRepository;
         this.profileRepository = profileRepository;
+        this.postReactionRepository = postReactionRepository;
         this.userService = userService;
     }
 
 
     @Transactional(readOnly = true)
-    public Page<PostResponse> getFeed(UserDetails userDetails, int page, int size) {
-        User currentUser = userService.getUserByUserDetails(userDetails);
+    public Page<PostResponse> getFeed(CustomUserDetails userDetails, int page, int size) {
+        User currentUser = userDetails.getUser();
         Long currentUserId = currentUser.getId();
 
         // Собираем айдишники наших друзей
@@ -92,8 +95,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponse> getUserFeed(UserDetails userDetails, Long userId, int page, int size) {
-        User viewer = userService.getUserByUserDetails(userDetails);;
+    public Page<PostResponse> getUserFeed(CustomUserDetails userDetails, Long userId, int page, int size) {
+        User viewer = userDetails.getUser();
 
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Профиль не найден"));
@@ -139,6 +142,44 @@ public class PostService {
     }
 
 
+    @Transactional
+    public PostResponse processReaction(CustomUserDetails userDetails, Long postId, ReactionType type) {
+        User currentUser = userDetails.getUser();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        // ищем существующую рекцию
+        PostReaction existingReaction = post.getReactions().stream()
+                .filter(r -> r.getUserId().equals(currentUser.getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (existingReaction == null) {
+            PostReaction newReaction = new PostReaction();
+            newReaction.setUserId(currentUser.getId());
+            newReaction.setType(type);
+            post.getReactions().add(newReaction); 
+        } else {
+            if (existingReaction.getType() == type) {
+                post.getReactions().remove(existingReaction);
+                postReactionRepository.delete(existingReaction);
+            } else {
+                existingReaction.setType(type); 
+            }
+        }
+        
+        Post savedPost = postRepository.save(post);
+
+        Set<Long> userIdsToFetch = new HashSet<>();
+        userIdsToFetch.add(savedPost.getAuthorId());
+        savedPost.getComments().forEach(c -> userIdsToFetch.add(c.getAuthorId()));
+        
+        Map<Long, Profile> profilesMap = profileRepository.findAllByUsersId(new ArrayList<>(userIdsToFetch))
+                .stream().collect(Collectors.toMap(Profile::getUserId, p -> p));
+        
+        return mapToDto(savedPost, profilesMap, currentUser.getId());
+    }
+
     private PostResponse mapToDto(Post post, Map<Long, Profile> profilesMap, Long currentUserId) {
         // Считаем реакции
         long likes = post.getReactions().stream().filter(r -> r.getType() == ReactionType.LIKE).count();
@@ -175,46 +216,5 @@ public class PostService {
         String name = profile.getFirstName() + " " + profile.getLastName();
         String avatarUrl = "/images/default-avatar.png";
         return new ProfileShortDto(profile.getUserId(), name, avatarUrl);
-    } 
-    
-    @Transactional
-    public PostResponse processReaction(UserDetails userDetails, Long postId, ReactionType type) {
-        User currentUser = userService.getUserByUserDetails(userDetails);
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
-
-        // ищем существующую рекцию
-        PostReaction existingReaction = post.getReactions().stream()
-                .filter(r -> r.getUserId().equals(currentUser.getId()))
-                .findFirst()
-                .orElse(null);
-
-        if (existingReaction == null) {
-            PostReaction newReaction = new PostReaction();
-            newReaction.setUserId(currentUser.getId());
-            newReaction.setType(type);
-            post.getReactions().add(newReaction); 
-        } else {
-            if (existingReaction.getType() == type) {
-                post.getReactions().remove(existingReaction);
-                postReactionRepository.delete(existingReaction);
-            } else {
-                existingReaction.setType(type); 
-            }
-        }
-        
-        Post savedPost = postRepository.save(post);
-        
-
-        Set<UUID> userIdsToFetch = new HashSet<>();
-        userIdsToFetch.add(savedPost.getAuthorId());
-        savedPost.getComments().forEach(c -> userIdsToFetch.add(c.getAuthorId()));
-        
-        Map<UUID, Profile> profilesMap = profileRepository.findAllByUsersId(new ArrayList<>(userIdsToFetch))
-                .stream().collect(Collectors.toMap(Profile::getUserId, p -> p));
-        
-        return mapToDto(savedPost, profilesMap, currentUser.getId());
-
-
     }
 }
