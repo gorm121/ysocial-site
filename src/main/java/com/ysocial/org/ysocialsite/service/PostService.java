@@ -39,10 +39,9 @@ public class PostService {
         this.userService = userService;
     }
 
-
     @Transactional(readOnly = true)
     public Page<PostResponse> getFeed(CustomUserDetails userDetails, int page, int size) {
-        User currentUser = userDetails.getUser();
+        User currentUser = userService.getUserByUserDetails(userDetails);
         Long currentUserId = currentUser.getId();
 
         // Собираем айдишники наших друзей
@@ -96,7 +95,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getUserFeed(CustomUserDetails userDetails, Long userId, int page, int size) {
-        User viewer = userDetails.getUser();
+        User viewer = userService.getUserByUserDetails(userDetails);
 
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Профиль не найден"));
@@ -144,7 +143,7 @@ public class PostService {
 
     @Transactional
     public PostResponse processReaction(CustomUserDetails userDetails, Long postId, ReactionType type) {
-        User currentUser = userDetails.getUser();
+        User currentUser = userService.getUserByUserDetails(userDetails);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
