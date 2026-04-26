@@ -119,7 +119,7 @@ public class PostController {
         // вставить резултат туда откуда был отправлен
         // поэтому мы напрямую говорим перезагрузи страничку
         response.setHeader("HX-Refresh", "true");
-        return "";
+        return null;
     }
 
 }
