@@ -1,6 +1,7 @@
 package com.ysocial.org.ysocialsite.service;
 
 import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
+import com.ysocial.org.ysocialsite.dto.request.CreatePostRequest;
 import com.ysocial.org.ysocialsite.dto.response.CommentResponse;
 import com.ysocial.org.ysocialsite.dto.response.PostResponse;
 import com.ysocial.org.ysocialsite.entites.*;
@@ -14,8 +15,10 @@ import com.ysocial.org.ysocialsite.repository.ProfileRepository;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -41,7 +44,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getFeed(CustomUserDetails userDetails, int page, int size) {
-        User currentUser = userService.getUserByUserDetails(userDetails);
+        User currentUser = userDetails.getUser();
         Long currentUserId = currentUser.getId();
 
         // Собираем айдишники наших друзей
@@ -95,7 +98,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getUserFeed(CustomUserDetails userDetails, Long userId, int page, int size) {
-        User viewer = userService.getUserByUserDetails(userDetails);
+        User viewer = userDetails.getUser();
 
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Профиль не найден"));
@@ -143,26 +146,29 @@ public class PostService {
 
     @Transactional
     public PostResponse processReaction(CustomUserDetails userDetails, Long postId, ReactionType type) {
-        User currentUser = userService.getUserByUserDetails(userDetails);
+        User currentUser = userDetails.getUser();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // ищем существующую рекцию
+        // ищем существующую рекцию по id юзера
         PostReaction existingReaction = post.getReactions().stream()
                 .filter(r -> r.getUserId().equals(currentUser.getId()))
                 .findFirst()
                 .orElse(null);
 
+        // еслии нет вообще реакции то создаем ее
         if (existingReaction == null) {
             PostReaction newReaction = new PostReaction();
             newReaction.setUserId(currentUser.getId());
             newReaction.setType(type);
             post.getReactions().add(newReaction); 
         } else {
+            // если была реакция которую на фронте нажал юзер то убираем ее
             if (existingReaction.getType() == type) {
                 post.getReactions().remove(existingReaction);
                 postReactionRepository.delete(existingReaction);
             } else {
+                // иначе меняем на другую
                 existingReaction.setType(type); 
             }
         }
@@ -177,6 +183,24 @@ public class PostService {
                 .stream().collect(Collectors.toMap(Profile::getUserId, p -> p));
         
         return mapToDto(savedPost, profilesMap, currentUser.getId());
+    }
+
+    @Transactional
+    public boolean createPost(CustomUserDetails userDetails,
+                              CreatePostRequest request,
+                              MultipartFile image) {
+        User currentUser = userDetails.getUser();
+
+        Post post = new Post();
+        post.setAuthorId(currentUser.getId());
+        post.setContent(request.getContent());
+
+        if (image != null && !image.isEmpty()) {
+            post.setImageUrl(null);
+        }
+
+        postRepository.save(post);
+        return true;
     }
 
     private PostResponse mapToDto(Post post, Map<Long, Profile> profilesMap, Long currentUserId) {

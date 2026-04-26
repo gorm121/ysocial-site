@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -82,5 +83,13 @@ public class ProfileController {
         profileService.updateProfile(userDetails, request, avatar);
         response.setHeader("HX-Redirect", "/profiles");
         return null;
+    }
+
+    @GetMapping("/create-form")
+    public String getCreatePostForm(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                    Model model) {
+        ProfileDto profileDto = profileService.getMyProfile(userDetails);
+        model.addAttribute("profile", profileDto);
+        return "html/profile :: create-post-modal-fragment";
     }
 }
