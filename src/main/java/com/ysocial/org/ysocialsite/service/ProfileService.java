@@ -43,9 +43,13 @@ public class ProfileService {
     }
 
     public ProfileDto getMyProfile(CustomUserDetails userDetails) {
-        User user = userService.getUserByUserDetails(userDetails);
-        Long friendsCount = friendshipRepository.countFriendshipByUsersAndStatus(user.getId(), user.getId(), FriendshipStatus.ACCEPTED);
-        return mapToDto(user.getProfile(), friendsCount, true, null, user.getRole());
+        Long userId = userDetails.getUser().getId();
+        Long friendsCount = friendshipRepository.countFriendshipByUsersAndStatus(userId, userId, FriendshipStatus.ACCEPTED);
+
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Профиль пользователя не найден"));
+
+        return mapToDto(profile, friendsCount, true, null, userDetails.getRole());
     }
 
      public ProfileDto getProfileById(CustomUserDetails userDetails, Long id) {

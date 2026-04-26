@@ -1,18 +1,23 @@
 package com.ysocial.org.ysocialsite.controller;
 
 import com.ysocial.org.ysocialsite.dto.ProfileDto;
+import com.ysocial.org.ysocialsite.dto.request.CreatePostRequest;
 import com.ysocial.org.ysocialsite.dto.response.PostResponse;
 import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import com.ysocial.org.ysocialsite.service.PostService;
 import com.ysocial.org.ysocialsite.service.ProfileService;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Controller
@@ -83,5 +88,38 @@ public class PostController {
     }
 
 
+    @PostMapping
+    public String createPost(@AuthenticationPrincipal CustomUserDetails userDetails,
+                             @Valid @ModelAttribute CreatePostRequest request,
+                             BindingResult bindingResult,
+                             MultipartFile image,
+                             Model model) {
+        // если вылетело исключение то покажем ошибку в углу
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errors", bindingResult.getFieldErrors());
+            return "html/profile :: create-post-modal-fragment";
+        }
+        boolean isCreated = postService.createPost(userDetails, request, image);
+        // пост создался то релоад страницы
+        if (isCreated) {
+            return "redirect:/profiles";
+        }
+        // если вдруг не создался, в теории наверное такое может произойти
+        model.addAttribute("errors", "Не удалось создать пост");
+        return "html/profile :: create-post-modal-fragment";
+    }
+
+    @DeleteMapping("/{postId}")
+    public String deletePost(@AuthenticationPrincipal CustomUserDetails userDetails,
+                             @PathVariable Long postId,
+                             HttpServletResponse response) {
+        postService.deletePostByUser(userDetails,postId);
+
+        // на фронте hx-delete отправляет ajax и затем попытается
+        // вставить резултат туда откуда был отправлен
+        // поэтому мы напрямую говорим перезагрузи страничку
+        response.setHeader("HX-Refresh", "true");
+        return null;
+    }
 
 }

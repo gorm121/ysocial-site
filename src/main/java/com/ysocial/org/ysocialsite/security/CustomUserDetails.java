@@ -1,6 +1,7 @@
 package com.ysocial.org.ysocialsite.security;
 
 import com.ysocial.org.ysocialsite.entites.User;
+import com.ysocial.org.ysocialsite.enums.UserRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,6 +28,14 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() { return user.getUsername(); }
+
+    public Long getId() {
+        return user.getId();
+    }
+
+    public UserRole getRole() {
+        return user.getRole();
+    }
 
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
