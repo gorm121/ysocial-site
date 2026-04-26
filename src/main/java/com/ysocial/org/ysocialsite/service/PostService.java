@@ -8,10 +8,7 @@ import com.ysocial.org.ysocialsite.entites.*;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.enums.UserRole;
-import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
-import com.ysocial.org.ysocialsite.repository.PostReactionRepository;
-import com.ysocial.org.ysocialsite.repository.PostRepository;
-import com.ysocial.org.ysocialsite.repository.ProfileRepository;
+import com.ysocial.org.ysocialsite.repository.*;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -31,14 +28,16 @@ public class PostService {
     private final FriendshipRepository friendshipRepository;
     private final ProfileRepository profileRepository;
     private final PostReactionRepository postReactionRepository;
+    private final UserRepository userRepository;
     
     private final UserService userService;
 
-    public PostService(PostRepository postRepository, FriendshipRepository friendshipRepository, ProfileRepository profileRepository, PostReactionRepository postReactionRepository, UserService userService) {
+    public PostService(PostRepository postRepository, FriendshipRepository friendshipRepository, ProfileRepository profileRepository, PostReactionRepository postReactionRepository, UserRepository userRepository, UserService userService) {
         this.postRepository = postRepository;
         this.friendshipRepository = friendshipRepository;
         this.profileRepository = profileRepository;
         this.postReactionRepository = postReactionRepository;
+        this.userRepository = userRepository;
         this.userService = userService;
     }
 
@@ -201,6 +200,31 @@ public class PostService {
 
         postRepository.save(post);
         return true;
+    }
+
+    @Transactional
+    public void deletePostByUser(CustomUserDetails userDetails, Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Пост не найден"));
+
+        // если автор то удаляем
+        if (post.getAuthorId().equals(userDetails.getId())) {
+            postRepository.delete(post);
+            return;
+        }
+
+        // если не автор то по ролям будем проверять
+        User currentUser = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        boolean isStaff = List.of(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MODERATOR)
+                .contains(currentUser.getRole());
+
+        if (!isStaff) {
+            throw new RuntimeException("У вас нет прав на удаление чужого поста");
+        }
+
+        postRepository.delete(post);
     }
 
     private PostResponse mapToDto(Post post, Map<Long, Profile> profilesMap, Long currentUserId) {

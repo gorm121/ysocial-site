@@ -7,6 +7,7 @@ import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import com.ysocial.org.ysocialsite.service.PostService;
 import com.ysocial.org.ysocialsite.service.ProfileService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -106,6 +107,19 @@ public class PostController {
         // если вдруг не создался, в теории наверное такое может произойти
         model.addAttribute("errors", "Не удалось создать пост");
         return "html/profile :: create-post-modal-fragment";
+    }
+
+    @DeleteMapping("/{postId}")
+    public String deletePost(@AuthenticationPrincipal CustomUserDetails userDetails,
+                             @PathVariable Long postId,
+                             HttpServletResponse response) {
+        postService.deletePostByUser(userDetails,postId);
+
+        // на фронте hx-delete отправляет ajax и затем попытается
+        // вставить резултат туда откуда был отправлен
+        // поэтому мы напрямую говорим перезагрузи страничку
+        response.setHeader("HX-Refresh", "true");
+        return "";
     }
 
 }
