@@ -38,8 +38,8 @@ public class Post {
     private LocalDateTime createdAt;
 
     @Builder.Default
-    @MappedCollection(idColumn = "post_id", keyColumn = "comment_order")
-    private List<Comment> comments = new ArrayList<>();
+    @MappedCollection(idColumn = "post_id")
+    private Set<Comment> comments = new LinkedHashSet<>();
 
     @Builder.Default
     @MappedCollection(idColumn = "post_id")

@@ -96,7 +96,7 @@ VALUES
 -- Посты от пользователя 'friend'
 INSERT INTO posts (author_id, content)
 VALUES
-    ((SELECT id FROM users WHERE username = 'friend'), 'Привет всем! Я только что зарегистрировался.'),
+    ((SELECT id FROM users WHERE username = 'superadmin'), 'Привет всем! Я только что зарегистрировался.'),
     ((SELECT id FROM users WHERE username = 'friend'), 'Люблю программировать по вечерам 💻');
 
 -- ==================== ТЕСТОВАЯ ДРУЖБА ====================
