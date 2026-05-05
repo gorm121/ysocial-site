@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,8 +79,8 @@ public class PostService {
         Set<Long> userIdsToFetch = posts.stream().map(Post::getAuthorId).collect(Collectors.toSet());
 
         // тут добавляем еще челов из комментов
-        posts.forEach(post -> 
-            post.getComments().forEach(comment -> userIdsToFetch.add(comment.getAuthorId()))
+        posts.forEach(post ->
+                post.getComments().forEach(comment -> userIdsToFetch.add(comment.getAuthorId()))
         );
 
         // собираем наши профили одним запросом
@@ -193,6 +194,7 @@ public class PostService {
         Post post = new Post();
         post.setAuthorId(currentUser.getId());
         post.setContent(request.getContent());
+        post.setCreatedAt(LocalDateTime.now());
 
         if (image != null && !image.isEmpty()) {
             post.setImageUrl(null);
@@ -248,6 +250,7 @@ public class PostService {
                 .reactionType(myReaction)
                 .author(toProfileInPostDto(authorProfile))
                 .comments(post.getComments().stream()
+                        .sorted(Comparator.comparing(Comment::getCreatedAt).reversed())
                         .map(c -> {
                             // O(1)  профиль комментатора из той же Map
                             Profile commentAuthor = profilesMap.get(c.getAuthorId());

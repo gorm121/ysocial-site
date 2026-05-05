@@ -26,11 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostController {
 
     private final PostService postService;
-    private final ProfileService profileService;
 
-    public PostController(PostService postService, ProfileService profileService) {
+    public PostController(PostService postService) {
         this.postService = postService;
-        this.profileService = profileService;
     }
 
     @GetMapping("/feed")
