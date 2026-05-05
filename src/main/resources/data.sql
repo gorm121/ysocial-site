@@ -108,3 +108,10 @@ VALUES (
            (SELECT id FROM users WHERE username = 'friend'),
            'ACCEPTED'
        );
+
+INSERT INTO friendships (requester_id, addressee_id, status)
+VALUES (
+    (SELECT id FROM users WHERE username = 'superadmin'),
+    (SELECT id FROM users WHERE username = 'moderator'),
+    'PENDING'
+);

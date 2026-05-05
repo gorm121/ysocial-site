@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+
+    <div th:fragment="friend-request-item(request)" th:if="${request != null}" class="friend-request-item" th:id="'request-' + ${request.id}">
+        <div class="friend-request-avatar">
+            <a th:href="@{/profiles/{id}(id=${request.id})}">
+                <div class="user-avatar" th:style="'background-image: url(' + ${request.avatarUrl} + ')'"></div>
+            </a>
+        </div>
+        <div class="friend-request-info">
+            <div class="friend-request-name">
+                <a th:href="@{/profiles/{id}(id=${request.id})}" th:text="${request.name}"></a>
+            </div>
+            <div class="friend-request-time" th:text="${request.formattedDate}"></div>
+        </div>
+        <div class="friend-request-actions">
+            <button class="btn btn-primary btn-small"
+                    th:hx-post="@{/friends/request/{id}/accept(id=${request.id})}"
+                    hx-on::after-request="window.location.reload()">
+                Принять
+            </button>
+            <button class="btn btn-secondary btn-small"
+                    th:hx-delete="@{/friends/request/{id}/reject(id=${request.id})}"
+                    hx-on::after-request="window.location.reload()">
+                Отклонить
+            </button>
+        </div>
+    </div>

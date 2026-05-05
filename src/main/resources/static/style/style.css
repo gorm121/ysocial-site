@@ -687,3 +687,94 @@ input {
 .edit-profile-btn:hover {
     color: white;
 }
+
+.friend-requests-list,
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.friend-request-item,
+.friend-item,
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.friend-request-item:hover,
+.friend-item:hover,
+.user-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.friend-request-avatar,
+.friend-avatar,
+.user-avatar-large {
+    flex-shrink: 0;
+}
+
+.friend-request-info,
+.friend-info,
+.user-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.friend-request-name,
+.friend-name,
+.user-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.chat-window a,
+.friend-request-name a,
+.friend-name a,
+.user-name a {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.friend-request-name a:hover,
+.friend-name a:hover,
+.user-name a:hover {
+    color: var(--accent-blue);
+}
+
+.friend-request-time {
+    font-size: 12px;
+    color: var(--text-placeholder);
+}
+
+.friend-mutual-count,
+.user-bio,
+.user-stats {
+    font-size: 13px;
+    color: var(--text-placeholder);
+    margin-bottom: 4px;
+}
+
+.friend-request-actions,
+.friend-actions,
+.user-actions {
+    flex-shrink: 0;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+
+

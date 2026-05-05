@@ -1,5 +1,6 @@
 package com.ysocial.org.ysocialsite.repository;
 
+import com.ysocial.org.ysocialsite.dto.FriendDto;
 import com.ysocial.org.ysocialsite.entites.Friendship;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import org.springframework.data.jdbc.repository.query.Query;
@@ -41,5 +42,35 @@ public interface FriendshipRepository extends ListCrudRepository<Friendship, Lon
     """)
     Long countFriendshipByUsersAndStatus(@Param("user1Id") Long user1Id, @Param("user2Id") Long user2Id, @Param("status") FriendshipStatus status);
 
+    @Query("""
+            SELECT 
+                p.user_id as id, 
+                concat(p.first_name, ' ', p.last_name) as name, 
+                p.avatar_url as avatar_url, 
+                f.created_at as added_at
+            FROM friendships f
+            JOIN profiles p ON f.requester_id = p.user_id
+            WHERE f.addressee_id = :userId
+            AND f.status = 'PENDING'
+            ORDER BY f.created_at DESC
+            """)
+    List<FriendDto> findRequestsWithProfiles(@Param("userId") Long userId);
 
+    @Query("""
+        SELECT 
+            p.user_id as id, 
+            concat(p.first_name, ' ', p.last_name) as name, 
+            p.avatar_url as avatar_url, 
+            f.created_at as added_at
+        FROM friendships f
+        JOIN profiles p ON (
+            (f.requester_id = p.user_id AND f.addressee_id = :userId) OR 
+            (f.addressee_id = p.user_id AND f.requester_id = :userId)
+        )
+        WHERE (f.requester_id = :userId OR f.addressee_id = :userId)
+        AND f.status = 'ACCEPTED'
+        AND p.user_id != :userId
+        ORDER BY f.created_at DESC
+        """)
+    List<FriendDto> findFriendsWithProfiles(@Param("userId") Long userId);
 }
