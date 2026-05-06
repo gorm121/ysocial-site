@@ -3,14 +3,13 @@ package com.ysocial.org.ysocialsite.repository;
 import com.ysocial.org.ysocialsite.dto.FriendDto;
 import com.ysocial.org.ysocialsite.entites.Friendship;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
+
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 
-
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
 public interface FriendshipRepository extends ListCrudRepository<Friendship, Long> {
@@ -73,4 +72,31 @@ public interface FriendshipRepository extends ListCrudRepository<Friendship, Lon
         ORDER BY f.created_at DESC
         """)
     List<FriendDto> findFriendsWithProfiles(@Param("userId") Long userId);
+
+    @Query("""
+        SELECT COUNT(*) > 0 FROM friendships WHERE 
+        (requester_id = :user1 AND addressee_id = :user2) OR 
+        (requester_id = :user2 AND addressee_id = :user1)
+    """)
+    boolean existsFriendshipBetween(@Param("user1") Long user1, @Param("user2") Long user2);
+
+    Optional<Friendship> findByAddresseeIdAndRequesterId(Long currentUserId, Long fromUserId);
+
+    @Query("""
+        SELECT * FROM friendships WHERE 
+        ((requester_id = :user1 AND addressee_id = :user2) OR 
+        (requester_id = :user2 AND addressee_id = :user1)) AND 
+        status = :status
+    """)
+    Optional<Friendship> findFriendshipBetweenAndStatus(@Param("user1") Long user1,
+                                                        @Param("user2") Long user2,
+                                                        @Param("status") FriendshipStatus status);
+
+    @Query("""
+        SELECT * FROM friendships WHERE 
+        (requester_id = :user2 AND addressee_id = :user1) AND 
+        status = 'PENDING'
+    """)
+    Optional<Friendship> findFriendshipRequest(@Param("user1") Long to,
+                                               @Param("user2") Long from);
 }

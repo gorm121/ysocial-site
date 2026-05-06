@@ -43,7 +43,7 @@ CREATE TABLE posts (
 
 CREATE TABLE comments (
     id            BIGSERIAL       PRIMARY KEY,
-    comment_order INT             NOT NULL,
+--     comment_order INT             NOT NULL,
     post_id       BIGINT          NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     author_id     BIGSERIAL       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     text          VARCHAR(255)    NOT NULL,

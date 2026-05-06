@@ -3,28 +3,112 @@
 <body>
 
 
-    <div th:fragment="friend-request-item(request)" th:if="${request != null}" class="friend-request-item" th:id="'request-' + ${request.id}">
-        <div class="friend-request-avatar">
-            <a th:href="@{/profiles/{id}(id=${request.id})}">
-                <div class="user-avatar" th:style="'background-image: url(' + ${request.avatarUrl} + ')'"></div>
-            </a>
+<div th:fragment="friend-request-item(request)" th:if="${request != null}" class="friend-request-item" th:id="'request-' + ${request.id}">
+    <div class="friend-request-avatar">
+        <a th:href="@{/profiles/{id}(id=${request.id})}">
+            <div class="user-avatar" th:style="'background-image: url(' + ${request.avatarUrl} + ')'"></div>
+        </a>
+    </div>
+    <div class="friend-request-info">
+        <div class="friend-request-name">
+            <a th:href="@{/profiles/{id}(id=${request.id})}" th:text="${request.name}"></a>
         </div>
-        <div class="friend-request-info">
-            <div class="friend-request-name">
-                <a th:href="@{/profiles/{id}(id=${request.id})}" th:text="${request.name}"></a>
-            </div>
-            <div class="friend-request-time" th:text="${request.formattedDate}"></div>
-        </div>
-        <div class="friend-request-actions">
-            <button class="btn btn-primary btn-small"
-                    th:hx-post="@{/friends/request/{id}/accept(id=${request.id})}"
-                    hx-on::after-request="window.location.reload()">
-                Принять
-            </button>
-            <button class="btn btn-secondary btn-small"
-                    th:hx-delete="@{/friends/request/{id}/reject(id=${request.id})}"
-                    hx-on::after-request="window.location.reload()">
-                Отклонить
-            </button>
+        <div class="friend-request-time" th:text="${request.formattedDate}"></div>
+    </div>
+    <div class="friend-request-actions">
+        <button class="btn btn-primary btn-small"
+                th:hx-post="@{/friends/request/{id}/accept(id=${request.id})}"
+                hx-on::after-request="window.location.reload()">
+            Принять
+        </button>
+        <button class="btn btn-secondary btn-small"
+                th:hx-delete="@{/friends/request/{id}/reject(id=${request.id})}"
+                hx-on::after-request="window.location.reload()">
+            Отклонить
+        </button>
+    </div>
+</div>
+
+<div th:fragment="friend-item(friend)" th:if="${friend != null}" class="friend-item" th:id="'friend-' + ${friend.id}">
+    <div class="friend-avatar">
+        <a th:href="@{/profiles/{id}(id=${friend.id})}">
+            <div class="user-avatar" th:style="'background-image: url(' + ${friend.avatarUrl} + ')'"></div>
+        </a>
+    </div>
+    <div class="friend-info">
+        <div class="friend-name">
+            <a th:href="@{/profiles/{id}(id=${friend.id})}" th:text="${friend.name}"></a>
         </div>
     </div>
+    <div class="friend-actions">
+        <button class="btn btn-secondary btn-small"
+                th:hx-delete="@{/friends/{id}/remove(id=${friend.id})}"
+                hx-on::after-request="window.location.reload()">
+            Удалить из друзей
+        </button>
+    </div>
+</div>
+
+<div th:fragment="user-item(user)" th:if="${user != null}" class="friend-item" th:id="'user-' + ${user.id}">
+    <div class="friend-avatar">
+        <a th:href="@{/profiles/{id}(id=${user.id})}">
+            <div class="user-avatar" th:style="'background-image: url(' + ${user.avatarUrl} + ')'"></div>
+        </a>
+    </div>
+    <div class="friend-info">
+        <div class="friend-name">
+            <a th:href="@{/profiles/{id}(id=${user.id})}" th:text="${user.name}"></a>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="user-item-with-status(user, friendshipStatus)" th:if="${user != null}" class="user-item" th:id="'user-' + ${user.id}">
+    <div class="user-avatar-large">
+        <a th:href="@{/profiles/{id}(id=${user.id})}">
+            <div class="user-avatar" th:style="'background-image: url(' + ${user.avatarUrl} + ')'"></div>
+        </a>
+    </div>
+    <div class="user-info">
+        <div class="user-name">
+            <a th:href="@{/profiles/{id}(id=${user.id})}" th:text="${user.name}"></a>
+        </div>
+        <div class="user-bio" th:text="${user.bio ?: 'Информация отсутствует'}"></div>
+        <div class="user-stats">
+            <span th:text="${user.countFriends ?: 0}"></span> друзей
+        </div>
+    </div>
+    <div class="user-actions">
+        <th:block th:if="${friendshipStatus == null}">
+            <button class="btn btn-primary btn-small"
+                    th:hx-post="@{/friends/request/{id}/send(id=${user.id})}"
+                    th:hx-target="'#user-' + ${user.id}"
+                    hx-on::after-request="window.location.reload()">
+                Добавить в друзья
+            </button>
+        </th:block>
+        <th:block th:if="${friendshipStatus != null and #strings.toString(friendshipStatus) == 'PENDING'}">
+            <button class="btn btn-secondary btn-small" disabled>
+                Заявка отправлена
+            </button>
+        </th:block>
+        <th:block th:if="${friendshipStatus != null and #strings.toString(friendshipStatus) == 'RECEIVED'}">
+            <button class="btn btn-primary btn-small"
+                    th:hx-post="@{/friends/request/{id}/accept(id=${user.id})}"
+                    th:hx-target="'#user-' + ${user.id}"
+                    hx-swap="outerHTML">
+                Принять заявку
+            </button>
+        </th:block>
+        <th:block th:if="${friendshipStatus != null and #strings.toString(friendshipStatus) == 'ACCEPTED'}">
+            <button class="btn btn-secondary btn-small"
+                    th:hx-delete="@{/friends/{id}/remove(id=${user.id})}"
+                    th:hx-target="'#user-' + ${user.id}"
+                    hx-swap="outerHTML">
+                Удалить из друзей
+            </button>
+        </th:block>
+    </div>
+</div>
+
+</body>
+</html>

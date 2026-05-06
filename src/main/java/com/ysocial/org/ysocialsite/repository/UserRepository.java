@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface UserRepository extends ListCrudRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
+    Optional<User> findById(Long id);
 
 
     @Query("SELECT COUNT(*) > 0 FROM users WHERE email = :email OR username = :username")
