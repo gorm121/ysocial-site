@@ -63,6 +63,47 @@
                                             hx-swap="beforeend">
                                         Редактировать профиль ✎
                                     </button>
+                                    <div th:if="${!isOwnProfile}" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MODERATOR')" id="adminActions" 
+                                        style="position:relative; margin-left: 10px;">
+                                        <details>
+                                            <summary class="edit-profile-btn" title="Администрирование" 
+                                                    style="list-style: none; cursor: pointer; padding: 8px 16px; font-size: 18px; line-height: 1; font-weight: bold; user-select: none;">
+                                                ⋯
+                                            </summary>
+                                            
+                                            <div class="dropdown-menu" style="display: flex; flex-direction: column; position: absolute; top: calc(100% + 8px); right: 0; min-width: 170px; z-index: 100;">
+                                                
+                                                <button class="dropdown-item danger" 
+                                                        style="background: transparent; border: none; width: 100%; text-align: left;"
+                                                        th:hx-post="@{/admin/users/{id}/role(id=${userId})} + '?newRole=USER'" 
+                                                        hx-target="body" 
+                                                        hx-swap="innerHTML"
+                                                        >Роль: USER</button>
+
+                                                <button class="dropdown-item danger" 
+                                                        style="background: transparent; border: none; width: 100%; text-align: left;"
+                                                        th:hx-post="@{/admin/users/{id}/role(id=${userId})} + '?newRole=MODERATOR'" 
+                                                        hx-target="body" 
+                                                        hx-swap="innerHTML"
+                                                        >Роль: MODERATOR</button>
+
+                                                <button class="dropdown-item danger" 
+                                                        style="background: transparent; border: none; width: 100%; text-align: left;"
+                                                        sec:authorize="hasRole('SUPER_ADMIN')"
+                                                        th:hx-post="@{/admin/users/{id}/role(id=${userId})} + '?newRole=ADMIN'" 
+                                                        hx-target="body" 
+                                                        hx-swap="innerHTML"
+                                                        >Роль: ADMIN</button>
+                                                
+                                                <button class="dropdown-item danger" 
+                                                        style="background: transparent; border: none; width: 100%; text-align: left;"
+                                                        th:hx-post="@{/admin/users/{id}/ban(id=${userId})}" 
+                                                        hx-target="body" 
+                                                        hx-swap="innerHTML"
+                                                        >Заблокировать</button>
+                                            </div>
+                                        </details>
+                                    </div>
                                 </div>
                             </div>
                             <p class="profile-bio" th:id="profileBio" th:text="${profile.bio ?: ''}"></p>
