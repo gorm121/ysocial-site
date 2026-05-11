@@ -6,23 +6,19 @@ import com.ysocial.org.ysocialsite.dto.request.VerifyRequest;
 import com.ysocial.org.ysocialsite.entites.Profile;
 import com.ysocial.org.ysocialsite.entites.User;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
+import com.ysocial.org.ysocialsite.exceptions.BadRequestException;
+import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 
 
-import org.apache.coyote.BadRequestException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 @Service
-@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -35,18 +31,16 @@ public class AuthService {
     }
 
     @Transactional
-    public void register(RegisterRequest request) {
+    public void register(RegisterRequest request) throws InterruptedException {
         String username = request.getUsername();
         String email = request.getEmail();
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            log.info("Пароли не совпадают");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароли не совпадают");
+            throw new BadRequestException("Пароли не совпадают");
         }
 
         if (userRepository.existsByEmailOrUsername(email, username)){
-            log.info("Почта или никнейм уже существуют");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Почта или никнейм уже существуют");
+            throw new BadRequestException("Почта или никнейм уже существуют");
         }
         String hashPassword = passwordEncoder.encode(request.getPassword());
 
@@ -61,7 +55,6 @@ public class AuthService {
 
         userRepository.save(user);
 
-        log.info("Отправляем код на {}", email);
         emailService.sendVerificationCode(email, code);
     }
 
@@ -69,25 +62,19 @@ public class AuthService {
     public void verifyCode(VerifyRequest request) {
         String email = request.getEmail();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Почта не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Почта не найдена"));
         if (user.getStatus() == AccountStatus.ACTIVE) {
-            throw new RuntimeException("Код истек, вернитесь на страницу регистрации и попробуйте снова");
-//            throw new BadRequestException("Аккаунт уже активен");
+            throw new BadRequestException("Аккаунт уже активен");
         }
 
         if (user.getExpiryCode().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Код истек, вернитесь на страницу регистрации и попробуйте снова");
-//            throw new BadRequestException("Код истек, вернитесь на страницу регистрации и попробуйте снова"");
+            throw new BadRequestException("Код истек, вернитесь на страницу регистрации и попробуйте снова");
         }
 
         String code = request.getCode();
 
-        log.info("Код в базе {}, код в запросе {}", user.getCode(), code);
-
         if (!user.getCode().equals(code)) {
-            log.error("Неверный код {}", code);
-            throw new RuntimeException("Неверный код");
-//            throw new BadRequestException("Неверный код");
+            throw new BadRequestException("Неверный код");
         }
 
         Profile profile = new Profile();

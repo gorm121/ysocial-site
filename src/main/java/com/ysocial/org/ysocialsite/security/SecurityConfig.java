@@ -35,6 +35,14 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/posts/feed", true)
+                        .failureHandler((request, response, exception) -> {
+                            // Если аккаунт заблокирован (isAccountNonLocked вернул false)
+                            if (exception instanceof org.springframework.security.authentication.LockedException) {
+                                response.sendRedirect("/login?banned=true");
+                            } else {
+                                response.sendRedirect("/login?error=true");
+                            }
+                        })
                         .permitAll()
                 )
 

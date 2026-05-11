@@ -6,8 +6,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
+@Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -30,9 +30,10 @@ public class EmailService {
 
         try {
             mailSender.send(message);
-            log.info("Письмо успешно отправлено на: {}", toEmail);
         } catch (Exception e) {
-            log.error("Ошибка при отправке почты: {}", e.getMessage());
+            // нет смысла кидать исключение так как это фоновый поток, а основной поток
+            // уже закончил работу
+            log.error("Ошибка при отправке email на {}: {}", toEmail, e.getMessage());
         }
     }
 }

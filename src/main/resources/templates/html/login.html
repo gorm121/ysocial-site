@@ -51,13 +51,17 @@
                         autocomplete="current-password">
             </div>
 
-
-
             <div class="actions">
                 <button type="submit" class="btn btn-primary">ВОЙТИ</button>
                 <a th:href="@{/register}" class="btn btn-secondary">Регистрация</a>
             </div>
         </form>
+        <div th:if="${param.banned}" id="banned-msg" class="error-msg">
+            Ваш аккаунт заблокирован. Пожалуйста, свяжитесь с администратором.
+        </div>
+         <div th:if="${param.error}" id="error-msg" class="error-msg">
+            Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.
+         </div>
     </div>
 </main>
 </body>

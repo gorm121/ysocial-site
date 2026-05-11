@@ -33,6 +33,15 @@ a {
     padding: 0;
 }
 
+.error-msg {
+    color: #ff6b6b;
+    background: rgba(255,107,107,0.1);
+    padding: 10px;
+    border-radius: 8px;
+    ont-size: 13px;
+    margin-bottom: 15px;
+}
+
 body {
     font-family: var(--font-main);
 

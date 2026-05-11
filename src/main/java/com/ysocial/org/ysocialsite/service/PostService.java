@@ -8,21 +8,22 @@ import com.ysocial.org.ysocialsite.entites.*;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.enums.UserRole;
+import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 import com.ysocial.org.ysocialsite.repository.*;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.*;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 public class PostService {
     private final PostRepository postRepository;
@@ -30,16 +31,18 @@ public class PostService {
     private final ProfileRepository profileRepository;
     private final PostReactionRepository postReactionRepository;
     private final UserRepository userRepository;
-    
-    private final UserService userService;
 
-    public PostService(PostRepository postRepository, FriendshipRepository friendshipRepository, ProfileRepository profileRepository, PostReactionRepository postReactionRepository, UserRepository userRepository, UserService userService) {
+    public PostService(PostRepository postRepository,
+                       FriendshipRepository friendshipRepository,
+                       ProfileRepository profileRepository,
+                       PostReactionRepository postReactionRepository,
+                       UserRepository userRepository
+    ) {
         this.postRepository = postRepository;
         this.friendshipRepository = friendshipRepository;
         this.profileRepository = profileRepository;
         this.postReactionRepository = postReactionRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
     }
 
     @Transactional(readOnly = true)
@@ -101,7 +104,7 @@ public class PostService {
         User viewer = userDetails.getUser();
 
         Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));
 
         Pageable pageable = PageRequest.of(page, size,
                 Sort.by(Sort.Direction.DESC, "createdAt")
@@ -148,7 +151,7 @@ public class PostService {
     public PostResponse processReaction(CustomUserDetails userDetails, Long postId, ReactionType type) {
         User currentUser = userDetails.getUser();
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Пост не найден"));
 
         // ищем существующую рекцию по id юзера
         PostReaction existingReaction = post.getReactions().stream()
@@ -207,7 +210,7 @@ public class PostService {
     @Transactional
     public void deletePostByUser(CustomUserDetails userDetails, Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Пост не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Пост не найден"));
 
         // если автор то удаляем
         if (post.getAuthorId().equals(userDetails.getId())) {
@@ -217,13 +220,13 @@ public class PostService {
 
         // если не автор то по ролям будем проверять
         User currentUser = userRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
         boolean isStaff = List.of(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MODERATOR)
                 .contains(currentUser.getRole());
 
         if (!isStaff) {
-            throw new RuntimeException("У вас нет прав на удаление чужого поста");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "У вас нет прав на удаление чужого поста");
         }
 
         postRepository.delete(post);

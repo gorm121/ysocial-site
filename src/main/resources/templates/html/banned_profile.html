@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{html/layout :: head('Профиль заблокирован', true)}"></head>
+<body>
+
+<header th:replace="~{html/layout :: main-header(avatarUrl=${currentUserAvatar ?: '/images/default-avatar.png'})}"></header>
+
+<div class="main-layout">
+    <aside th:replace="~{html/layout :: sidebar('profile')}"></aside>
+
+    <main class="profile-container">
+        <div class="profile-card" style="text-align: center; padding: 60px 20px;">
+
+            <div style="font-size: 72px; margin-bottom: 20px; user-select: none;">
+                🔒
+            </div>
+            <h1 style="color: #ff6b6b; margin-bottom: 15px; font-size: 28px;">
+                Профиль недоступен
+            </h1>
+            <p class="profile-bio"
+               style="font-size: 18px; margin-bottom: 40px; color: #666;">
+                Этот аккаунт был заблокирован за нарушение правил сайта.
+            </p>
+            <a th:href="@{/posts/feed}" class="btn btn-primary" style="display: inline-block; text-decoration: none; padding: 12px 24px; font-size: 16px;">
+                Вернуться в ленту
+            </a>
+        </div>
+    </main>
+</div>
+
+<th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+</body>
+</html>

@@ -10,13 +10,13 @@ import com.ysocial.org.ysocialsite.entites.User;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.enums.UserRole;
+import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
+import com.ysocial.org.ysocialsite.exceptions.UserBannedException;
 import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
-import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +27,6 @@ import java.util.Optional;
 
 
 @Service
-@Slf4j
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
@@ -47,7 +46,7 @@ public class ProfileService {
         Long friendsCount = friendshipRepository.countFriendshipByUsersAndStatus(userId, userId, FriendshipStatus.ACCEPTED);
 
         Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Профиль пользователя не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Профиль пользователя не найден"));
 
         return mapToDto(profile, friendsCount, true, null, userDetails.getRole());
     }
@@ -56,10 +55,10 @@ public class ProfileService {
         User viewer = userService.getUserByUserDetails(userDetails);
 
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+            .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));
 
         if (user.getStatus().equals(AccountStatus.BANNED)) {
-            throw new RuntimeException("Пользователь заблокирован");
+            throw new UserBannedException("Пользователь заблокирован");
         }
 
         Profile profile = user.getProfile();

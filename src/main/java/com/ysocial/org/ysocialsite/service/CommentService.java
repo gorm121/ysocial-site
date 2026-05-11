@@ -6,6 +6,7 @@ import com.ysocial.org.ysocialsite.dto.response.CommentResponse;
 import com.ysocial.org.ysocialsite.entites.Comment;
 import com.ysocial.org.ysocialsite.entites.Post;
 import com.ysocial.org.ysocialsite.entites.Profile;
+import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 import com.ysocial.org.ysocialsite.repository.PostRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
@@ -35,10 +36,10 @@ public class CommentService {
         Long currentUserId = userDetails.getId();
 
         Profile profile = profileRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Пост не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Пост не найден"));
 
         Comment comment = new Comment();
         comment.setAuthorId(currentUserId);

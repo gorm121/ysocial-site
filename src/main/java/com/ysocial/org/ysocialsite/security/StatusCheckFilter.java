@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
-
 public class StatusCheckFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
 
@@ -34,7 +33,6 @@ public class StatusCheckFilter extends OncePerRequestFilter {
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails userDetails) {
 
             Optional<User> userOptional = userRepository.findById(userDetails.getId());
-
             if (userOptional.isPresent() && userOptional.get().getStatus() == AccountStatus.BANNED) {
                 SecurityContextHolder.clearContext();
                 request.getSession().invalidate();
