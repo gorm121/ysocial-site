@@ -2,6 +2,7 @@ package com.ysocial.org.ysocialsite.controller;
 
 
 import com.ysocial.org.ysocialsite.dto.ProfileDto;
+import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
 import com.ysocial.org.ysocialsite.dto.request.UpdateProfileRequest;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import com.ysocial.org.ysocialsite.service.ProfileService;
@@ -9,6 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -91,5 +96,29 @@ public class ProfileController {
         ProfileDto profileDto = profileService.getMyProfile(userDetails);
         model.addAttribute("profile", profileDto);
         return "html/profile :: create-post-modal-fragment";
+    }
+    @GetMapping("/people")
+    public String getPeople(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                Model model
+    ) {
+        ProfileDto profileDto = profileService.getMyProfile(userDetails);
+        model.addAttribute("profile", profileDto);
+        return "html/people";
+    }
+
+
+    @GetMapping("/people/find")
+    public String findProfileByParams(@AuthenticationPrincipal  CustomUserDetails userDetails,
+                                    @RequestParam(required = false) String name,
+                                    @RequestParam(required = false) String city,
+                                    @RequestParam(required = false) LocalDate birthDate,
+                                    Model model
+    ) {
+        List<ProfileShortDto> results = profileService
+                            .findProfileByParams(userDetails, name, city, birthDate); 
+        model.addAttribute("results", results);
+        model.addAttribute("profile", profileService.getMyProfile(userDetails));
+
+        return "html/people";
     }
 }

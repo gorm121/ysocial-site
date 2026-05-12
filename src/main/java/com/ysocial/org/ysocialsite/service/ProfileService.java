@@ -17,12 +17,15 @@ import com.ysocial.org.ysocialsite.repository.ProfileRepository;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -110,6 +113,28 @@ public class ProfileService {
         profile.setPrivate(request.isPrivateProfile());
 
         userRepository.save(currentUser);
+    }
+    public List<ProfileShortDto> findProfileByParams(CustomUserDetails userDetails, String name,
+                                                           String city, LocalDate birthDate
+    ) {
+        Long currentUserId = userDetails.getId();
+
+        if (name.isBlank() && city.isBlank() && birthDate == null) {
+            return Collections.emptyList();
+        }
+
+        if (city.isBlank()) city = null;
+        if (name.isBlank()) name = null;
+
+        List<Profile> profilesList = profileRepository.searchProfilesList(currentUserId, name, city, birthDate);
+
+        if (profilesList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return profilesList.stream()
+            .map(this::toProfileInPostDto)
+            .toList();
     }
 
 
