@@ -63,7 +63,7 @@
                                             hx-swap="beforeend">
                                         Редактировать профиль ✎
                                     </button>
-                                    <div th:if="${!isOwnProfile}" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MODERATOR')" id="adminActions" 
+                                    <div sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MODERATOR')" id="adminActions"
                                         style="position:relative; margin-left: 10px;">
                                         <details>
                                             <summary class="edit-profile-btn" title="Администрирование" 
@@ -124,7 +124,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div th:if="${profile == null}">
                     <p>Профиль не найден</p>
                 </div>
@@ -151,7 +151,7 @@
                                     </a>   
                                     <div class="user-info">                    
                                         <div class="user-name" th:text="${post.author.name}"></div>
-                                    </div>        
+                                    </div>
                                     <div style="margin-left: auto;"
                                         th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'', ''MODERATOR'')') or isOwnProfile}">
                                         <button class="action-btn"

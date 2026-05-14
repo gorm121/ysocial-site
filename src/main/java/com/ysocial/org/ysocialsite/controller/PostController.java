@@ -65,10 +65,10 @@ public class PostController {
         model.addAttribute("size", size);
 
         Page<PostResponse> postPage = postService.getUserFeed(userDetails, userId, page, size);
-//        ProfileDto profileDto = profileService.getProfileById(userDetails, userId);
         model.addAttribute("posts", postPage);
         model.addAttribute("profileUserId", userId);
-        model.addAttribute("isOwnProfile", true); // true временно
+        boolean isOwnProfile = userDetails.getId().equals(userId);
+        model.addAttribute("isOwnProfile", isOwnProfile);
 
         return "html/profile :: post-chunk";
     }

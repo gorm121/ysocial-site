@@ -52,6 +52,7 @@ public class ProfileController {
         model.addAttribute("profile", profileDto);
         
         model.addAttribute("isOwnProfile", profileDto.isOwnProfile());
+        log.info(String.valueOf(profileDto.isOwnProfile()));
         return "html/profile";
     }
 
