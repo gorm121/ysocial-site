@@ -2,7 +2,7 @@ package com.ysocial.org.ysocialsite.repository;
 
 
 
-import com.ysocial.org.ysocialsite.entites.Profile;
+import com.ysocial.org.ysocialsite.entities.Profile;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;

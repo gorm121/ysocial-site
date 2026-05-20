@@ -1,6 +1,6 @@
 package com.ysocial.org.ysocialsite.service;
 
-import com.ysocial.org.ysocialsite.entites.User;
+import com.ysocial.org.ysocialsite.entities.User;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.enums.UserRole;
 import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;

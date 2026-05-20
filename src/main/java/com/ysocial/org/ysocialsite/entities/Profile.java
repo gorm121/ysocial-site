@@ -1,4 +1,4 @@
-package com.ysocial.org.ysocialsite.entites;
+package com.ysocial.org.ysocialsite.entities;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

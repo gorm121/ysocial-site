@@ -1,7 +1,7 @@
 package com.ysocial.org.ysocialsite.service;
 
 
-import com.ysocial.org.ysocialsite.entites.Friendship;
+import com.ysocial.org.ysocialsite.entities.Friendship;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.exceptions.BadRequestException;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ysocial.org.ysocialsite.dto.FriendDto;
-import com.ysocial.org.ysocialsite.entites.User;
+import com.ysocial.org.ysocialsite.entities.User;
 import com.ysocial.org.ysocialsite.repository.FriendshipRepository;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;

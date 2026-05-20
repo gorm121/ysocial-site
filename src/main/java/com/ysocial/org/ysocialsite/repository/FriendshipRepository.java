@@ -1,7 +1,7 @@
 package com.ysocial.org.ysocialsite.repository;
 
 import com.ysocial.org.ysocialsite.dto.FriendDto;
-import com.ysocial.org.ysocialsite.entites.Friendship;
+import com.ysocial.org.ysocialsite.entities.Friendship;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 
 import org.springframework.data.jdbc.repository.query.Query;

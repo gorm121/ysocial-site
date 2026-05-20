@@ -1,34 +1,36 @@
-package com.ysocial.org.ysocialsite.entites;
-
-import com.ysocial.org.ysocialsite.enums.ReactionType;
+package com.ysocial.org.ysocialsite.entities;
 
 import lombok.*;
-
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
 
-@Table("post_reactions")
+@Table("comments")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class PostReaction {
+public class Comment {
 
     @Id
     private Long id;
 
-    @Column("user_id")
-    private Long userId;
+    @Column("author_id")
+    private Long authorId;
 
-    private ReactionType type;
+    private String text;
 
     @CreatedDate
     @Column("created_at")
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column("updated_at")
+    private LocalDateTime updatedAt;
 }

@@ -2,7 +2,7 @@ package com.ysocial.org.ysocialsite.security;
 
 
 
-import com.ysocial.org.ysocialsite.entites.User;
+import com.ysocial.org.ysocialsite.entities.User;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
 
 import org.springframework.security.core.userdetails.UserDetails;

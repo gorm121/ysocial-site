@@ -1,4 +1,4 @@
-package com.ysocial.org.ysocialsite.entites;
+package com.ysocial.org.ysocialsite.entities;
 
 
 import lombok.*;
@@ -9,9 +9,7 @@ import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 @Table("posts")

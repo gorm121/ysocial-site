@@ -1,6 +1,9 @@
-package com.ysocial.org.ysocialsite.entites;
+package com.ysocial.org.ysocialsite.entities;
+
+import com.ysocial.org.ysocialsite.enums.ReactionType;
 
 import lombok.*;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
@@ -8,25 +11,24 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-@Table("chats")
+
+@Table("post_reactions")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Chat {
-    
+public class PostReaction {
+
     @Id
     private Long id;
 
-    @Column("user1")
-    private Long user1;
+    @Column("user_id")
+    private Long userId;
 
-    @Column("user2")
-    private Long user2;
-
-    private String lastMessageText;
+    private ReactionType type;
 
     @CreatedDate
-    private LocalDateTime lastSent = LocalDateTime.now();
+    @Column("created_at")
+    private LocalDateTime createdAt;
 }

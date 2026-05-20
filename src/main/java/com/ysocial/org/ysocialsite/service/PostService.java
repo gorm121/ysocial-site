@@ -4,7 +4,7 @@ import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
 import com.ysocial.org.ysocialsite.dto.request.CreatePostRequest;
 import com.ysocial.org.ysocialsite.dto.response.CommentResponse;
 import com.ysocial.org.ysocialsite.dto.response.PostResponse;
-import com.ysocial.org.ysocialsite.entites.*;
+import com.ysocial.org.ysocialsite.entities.*;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.enums.UserRole;

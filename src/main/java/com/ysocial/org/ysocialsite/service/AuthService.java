@@ -3,14 +3,15 @@ package com.ysocial.org.ysocialsite.service;
 
 import com.ysocial.org.ysocialsite.dto.request.RegisterRequest;
 import com.ysocial.org.ysocialsite.dto.request.VerifyRequest;
-import com.ysocial.org.ysocialsite.entites.Profile;
-import com.ysocial.org.ysocialsite.entites.User;
+import com.ysocial.org.ysocialsite.entities.Profile;
+import com.ysocial.org.ysocialsite.entities.User;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.exceptions.BadRequestException;
 import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class AuthService {
     private final UserRepository userRepository;
@@ -31,7 +33,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void register(RegisterRequest request) throws InterruptedException {
+    public void register(RegisterRequest request) {
         String username = request.getUsername();
         String email = request.getEmail();
 
@@ -62,7 +64,7 @@ public class AuthService {
     public void verifyCode(VerifyRequest request) {
         String email = request.getEmail();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Почта не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Произошла ошибка. Попробуйте пройти регистрацию заново."));
         if (user.getStatus() == AccountStatus.ACTIVE) {
             throw new BadRequestException("Аккаунт уже активен");
         }

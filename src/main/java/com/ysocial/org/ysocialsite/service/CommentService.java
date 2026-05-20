@@ -3,9 +3,9 @@ package com.ysocial.org.ysocialsite.service;
 
 import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
 import com.ysocial.org.ysocialsite.dto.response.CommentResponse;
-import com.ysocial.org.ysocialsite.entites.Comment;
-import com.ysocial.org.ysocialsite.entites.Post;
-import com.ysocial.org.ysocialsite.entites.Profile;
+import com.ysocial.org.ysocialsite.entities.Comment;
+import com.ysocial.org.ysocialsite.entities.Post;
+import com.ysocial.org.ysocialsite.entities.Profile;
 import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 import com.ysocial.org.ysocialsite.repository.PostRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;

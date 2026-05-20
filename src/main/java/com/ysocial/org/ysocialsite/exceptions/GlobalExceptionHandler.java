@@ -55,6 +55,19 @@ public class GlobalExceptionHandler {
                                                 Model model,
                                                 HttpServletRequest request,
                                                 HttpServletResponse response) {
+        // при верификации кода, у нас если сущность юзера не найдена, то кидается это исключение
+        // оно идет с URL: http://localhost:8081/verify?email=example@gmail.com
+        // эта проверка нужна чисто для того чтобы пользователю вывести ошибку, ну вдруг он
+        if (request.getParameter("email") != null){
+            model.addAttribute("message", ex.getMessage());
+
+            response.setHeader("HX-Retarget", "body");
+            response.setHeader("HX-Reswap", "beforeend");
+
+            return "html/fragments :: error-toast";
+        }
+
+
         String hxRequest = request.getHeader("HX-Request");
 
         // условно если мы лайкаем пост который только что удалили
@@ -66,7 +79,7 @@ public class GlobalExceptionHandler {
 
         // иначе отдаем страницу not_found, ну если например чел попытался
         // в адресной строке вписать "../profiles/10" - а такого профиля нет
-        model.addAttribute("errorMessage", ex.getMessage());
+        model.addAttribute("message", ex.getMessage());
         return "html/not_found";
     }
 

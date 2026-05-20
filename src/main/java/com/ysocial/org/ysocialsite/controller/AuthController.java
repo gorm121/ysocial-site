@@ -37,7 +37,7 @@ public class AuthController {
     public String registerUser( @Valid @ModelAttribute RegisterRequest user,
                                 RedirectAttributes redirectAttributes,
                                 HttpServletResponse response
-    ) throws InterruptedException {
+    )  {
         authService.register(user);
         redirectAttributes.addAttribute("email", user.getEmail());
         response.setHeader("HX-Redirect", "/verify?email=" + user.getEmail());

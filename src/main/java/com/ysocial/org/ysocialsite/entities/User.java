@@ -1,4 +1,4 @@
-package com.ysocial.org.ysocialsite.entites;
+package com.ysocial.org.ysocialsite.entities;
 
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.enums.UserRole;

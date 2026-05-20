@@ -2,7 +2,7 @@ package com.ysocial.org.ysocialsite.security;
 
 import lombok.Getter;
 
-import com.ysocial.org.ysocialsite.entites.User;
+import com.ysocial.org.ysocialsite.entities.User;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.enums.UserRole;
 

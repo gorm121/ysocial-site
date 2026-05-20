@@ -1,6 +1,6 @@
 package com.ysocial.org.ysocialsite.repository;
 
-import com.ysocial.org.ysocialsite.entites.Post;
+import com.ysocial.org.ysocialsite.entities.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.repository.query.Query;
@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.UUID;
 
 
 public interface PostRepository extends ListCrudRepository<Post, Long>, PagingAndSortingRepository<Post, Long> {

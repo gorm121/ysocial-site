@@ -1,7 +1,7 @@
 package com.ysocial.org.ysocialsite.dto.response;
 
 import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
-import com.ysocial.org.ysocialsite.entites.Comment;
+import com.ysocial.org.ysocialsite.entities.Comment;
 import lombok.*;
 
 @Builder
