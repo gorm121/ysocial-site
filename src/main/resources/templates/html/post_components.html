@@ -29,18 +29,36 @@
     </div>
 
     <!-- формально это наша функция-скелет которая принимает коммент и заполняет див -->
-    <div th:fragment="comment-item(comment)" th:if="${comment != null}" class="comment-item fade-in" th:id="'comment-' + ${comment.id}">
-        <a th:href="@{/profiles/{id}(id=${comment.author.id})}">
-            <div class="comment-avatar" th:style="'background-image: url(' + ${comment.author.avatarUrl} + ')'">  
-            </div>
-        </a>
-        <div class="comment-body">
-            <div class="comment-bubble">
-                <span class="comment-author" th:text="${comment.author.name}"></span>
-                <div class="comment-text" th:text="${comment.text}"></div>
-            </div>
-        </div>
-    </div>
+                    <div th:fragment="comment-item(comment)" th:if="${comment != null}" class="comment-item fade-in" th:id="'comment-' + ${comment.id}">
+                        <a th:href="@{/profiles/{id}(id=${comment.author.id})}">
+                            <div class="comment-avatar" th:style="'background-image: url(' + ${comment.author.avatarUrl} + ')'">
+                            </div>
+                        </a>
 
+                        <div class="comment-body" style="display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 12px; width: 100%;">
+
+                            <div class="comment-bubble" style="flex-grow: 1;">
+                                <span class="comment-author" th:text="${comment.author.name}"></span>
+                                <div class="comment-text" th:text="${comment.text}"></div>
+                            </div>
+
+                            <div th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'', ''MODERATOR'')') or comment.author.id == #authentication.principal.id}"
+                                 style="flex-shrink: 0; padding-right: 5px;">
+
+                                <button class="action-btn"
+                                        style="color: #ff6b6b; background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.5; transition: opacity 0.2s;"
+                                        onmouseover="this.style.opacity='1'"
+                                        onmouseout="this.style.opacity='0.5'"
+                                        title="Удалить комментарий"
+                                        type="button"
+                                        th:hx-delete="@{/comments/{commentId}(commentId=${comment.id})}"
+                                        hx-target="closest .comment-item"
+                                        hx-swap="outerHTML">
+                                    🗑
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
 </body>
 </html>

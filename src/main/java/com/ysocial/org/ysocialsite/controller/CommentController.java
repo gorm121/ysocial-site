@@ -5,19 +5,16 @@ import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import com.ysocial.org.ysocialsite.service.CommentService;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.*;
 
 
 @Controller
-@RequestMapping("/post/{postId}/comments")
+@RequestMapping("/comments")
 @Slf4j
 @Validated
 public class CommentController {
@@ -28,7 +25,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @PostMapping
+    @PostMapping("/{postId}")
     public String createComment(@AuthenticationPrincipal CustomUserDetails userDetails,
                                 @PathVariable("postId") Long postId,
                                 @RequestParam("text") @Size(min = 1, max = 50) String text,
@@ -37,5 +34,13 @@ public class CommentController {
         CommentResponse comment = commentService.createComment(userDetails, postId, text);
         model.addAttribute("comment", comment);
         return "html/post_components :: comment-item";
+    }
+
+    @DeleteMapping("/{commentId}")
+    public String deleteComment(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                @PathVariable("commentId") Long commentId
+    ) {
+        commentService.deleteComment(userDetails, commentId);
+        return "html/fragments :: empty-fragment";
     }
 }

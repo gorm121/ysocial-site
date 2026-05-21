@@ -192,7 +192,7 @@
                                             name="text"
                                             class="comment-input"
                                             placeholder="Написать комментарий..."
-                                            th:hx-post="@{/post/{postId}/comments(postId=${post.id})}"
+                                            th:hx-post="@{/comments/{postId}(postId=${post.id})}"
                                             th:hx-target="'#comments-list-' + ${post.id}"
                                             hx-trigger="keyup[key=='Enter']"
                                             hx-swap="afterbegin"

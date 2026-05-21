@@ -6,9 +6,13 @@ import com.ysocial.org.ysocialsite.dto.response.CommentResponse;
 import com.ysocial.org.ysocialsite.entities.Comment;
 import com.ysocial.org.ysocialsite.entities.Post;
 import com.ysocial.org.ysocialsite.entities.Profile;
+import com.ysocial.org.ysocialsite.entities.User;
+import com.ysocial.org.ysocialsite.enums.UserRole;
 import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
+import com.ysocial.org.ysocialsite.repository.CommentRepository;
 import com.ysocial.org.ysocialsite.repository.PostRepository;
 import com.ysocial.org.ysocialsite.repository.ProfileRepository;
+import com.ysocial.org.ysocialsite.repository.UserRepository;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,11 +27,15 @@ import java.time.LocalDateTime;
 public class CommentService {
     private final PostRepository postRepository;
     private final ProfileRepository profileRepository;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
 
-    public CommentService(PostRepository postRepository, ProfileRepository profileRepository, UserService userService) {
+    public CommentService(PostRepository postRepository, ProfileRepository profileRepository, UserService userService, CommentRepository commentRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.profileRepository = profileRepository;
+        this.commentRepository = commentRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -53,5 +61,21 @@ public class CommentService {
         String avatarUrl = "/images/default-avatar.png";
 
         return new CommentResponse(comment, new ProfileShortDto(currentUserId, name, avatarUrl));
-    }     
+    }
+
+    public void deleteComment(CustomUserDetails userDetails, Long commentId) {
+        Long currentUserId = userDetails.getId();
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Комментарий не найден"));
+        if (comment.getAuthorId().equals(currentUserId)) {
+            commentRepository.delete(comment);
+            return;
+        }
+
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+        if (user.getRole() != UserRole.USER) {
+            commentRepository.delete(comment);
+        }
+    }
 }

@@ -21,9 +21,9 @@
                                 <div class="user-name" th:text="${post.author.name}"></div>    
                             </div>    
                                   
-                            <div style="margin-left: auto;" 
+                            <div style="margin-left: auto;"
                                 th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'', ''MODERATOR'')')}">
-                                <button class="action-btn" 
+                                <button class="action-btn"
                                         style="color: #f00;"
                                         type="button"
                                         th:hx-delete="@{/posts/{postId}(postId=${post.id})}">
@@ -62,7 +62,7 @@
                                 name="text" 
                                 class="comment-input" 
                                 placeholder="Написать комментарий..."
-                                th:hx-post="@{/post/{postId}/comments(postId=${post.id})}"
+                                th:hx-post="@{/comments/{postId}(postId=${post.id})}"
                                 th:hx-target="'#comments-list-' + ${post.id}"
                                 hx-trigger="keyup[key=='Enter']" 
                                 hx-swap="afterbegin"
