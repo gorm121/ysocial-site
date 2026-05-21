@@ -1,3 +1,27 @@
+package com.ysocial.org.ysocialsite.service;
+
+import com.ysocial.org.ysocialsite.dto.ChatDto;
+import com.ysocial.org.ysocialsite.dto.ChatInListDto;
+import com.ysocial.org.ysocialsite.dto.MessageInChatDto;
+import com.ysocial.org.ysocialsite.entities.Chat;
+import com.ysocial.org.ysocialsite.entities.Message;
+import com.ysocial.org.ysocialsite.entities.Profile;
+import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
+import com.ysocial.org.ysocialsite.repository.ChatRepository;
+import com.ysocial.org.ysocialsite.repository.MessageRepository;
+import com.ysocial.org.ysocialsite.repository.ProfileRepository;
+import com.ysocial.org.ysocialsite.security.CustomUserDetails;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
 public class MessageService {
     private final MessageRepository messageRepository;
@@ -23,7 +47,7 @@ public class MessageService {
                 .collect(Collectors.toSet());
 
         // здесь собираем их профили
-        Map<Long, Profile> userMap = profileRepository.findAllByUsersId(partnerIds).stream()
+        Map<Long, Profile> userMap = profileRepository.findAllByUsersId(partnerIds.stream().toList()).stream()
                                     .collect(Collectors.toMap(Profile::getUserId, p -> p));
 
 
@@ -48,7 +72,7 @@ public class MessageService {
         Long currentUserId = userDetails.getId();
 
 
-        if (userId == currentUserId) {
+        if (userId.equals(currentUserId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Нельзя создать чат с самим собой");
         }
 
@@ -85,7 +109,7 @@ public class MessageService {
             chat = chatRepository.save(chat); 
         }
 
-        String avatarUrl = profile.getAvatarUrl() != null && !profile.getAvatarUrl().isBlank() ? storageService.getAvatarUrl(profile.getAvatarUrl()) : "/images/default-avatar.png";
+        String avatarUrl = "/images/default-avatar.png";
         return new ChatDto(chat.getId(), userId, name, avatarUrl, messages);
     }
 
@@ -96,7 +120,7 @@ public class MessageService {
         Chat chat = chatRepository.findById(chatId)
             .orElseThrow(() -> new EntityNotFoundException("Чат не найден"));
 
-        Long userId = chat.getUser1() == currentUserId ? chat.getUser2() : chat.getUser1();
+        Long userId = chat.getUser1().equals(currentUserId) ? chat.getUser2() : chat.getUser1();
 
         Profile profile = profileRepository.findByUserId(userId)
             .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));

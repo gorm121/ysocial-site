@@ -7,6 +7,7 @@ import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -24,4 +25,6 @@ public interface UserRepository extends ListCrudRepository<User, Long> {
 
     @Query("SELECT COUNT(*) > 0 FROM users WHERE email = :email OR username = :username")
     boolean existsByEmailOrUsername(@Param("email") String email, @Param("username") String username);
+
+    Optional<User> findByCode(String code);
 }

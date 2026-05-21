@@ -16,6 +16,15 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(AccountActivateException.class)
+    public String handleAccountActivateException(AccountActivateException ex,
+                                   Model model)
+    {
+        model.addAttribute("errorMessage", ex.getMessage());
+
+        return "html/activation-error";
+    }
+
     @ExceptionHandler(UserBannedException.class)
     public String handleUserBanned(UserBannedException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());

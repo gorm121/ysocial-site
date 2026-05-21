@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация успешна - Ysocial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/style/style.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+<body>
+
+<header th:replace="~{html/layout :: auth-header}"></header>
+
+<main class="login-wrapper">
+    <div class="login-card" style="text-align: center;">
+
+        <div class="brand-logo">
+            <div class="logo-circle">
+                <span class="logo-text">✉</span>
+            </div>
+        </div>
+
+        <h1 class="form-title">Почти готово!</h1>
+
+        <p style="margin-bottom: 24px; color: #555; line-height: 1.6; font-size: 15px;">
+            Вы успешно зарегистрировались в <strong>Ysocial</strong>.
+            <br><br>
+            Мы отправили письмо на ваш электронный адрес. Пожалуйста, <strong>перейдите по ссылке в письме</strong>, чтобы активировать и подтвердить свой аккаунт.
+        </p>
+
+        <div class="actions">
+            <a th:href="@{/login}" class="btn btn-secondary" style="display: block; text-align: center; text-decoration: none;">На страницу входа</a>
+        </div>
+
+    </div>
+</main>
+</body>
+</html>

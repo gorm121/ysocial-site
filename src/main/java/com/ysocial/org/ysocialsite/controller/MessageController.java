@@ -1,3 +1,18 @@
+package com.ysocial.org.ysocialsite.controller;
+
+import com.ysocial.org.ysocialsite.dto.ChatDto;
+import com.ysocial.org.ysocialsite.dto.MessageInChatDto;
+import com.ysocial.org.ysocialsite.dto.ProfileDto;
+import com.ysocial.org.ysocialsite.security.CustomUserDetails;
+import com.ysocial.org.ysocialsite.service.MessageService;
+import com.ysocial.org.ysocialsite.service.ProfileService;
+import jakarta.validation.constraints.Size;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
 @Controller
 @RequestMapping("/messages")
 @Validated

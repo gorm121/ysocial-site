@@ -17,19 +17,24 @@ public class EmailService {
     }
 
     @Async
-    public void sendVerificationCode(String toEmail, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
+    public void sendVerificationCode(String toEmail, String subject, String message) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
 
-        message.setFrom("denis123984@yandex.ru");
-        message.setTo(toEmail);
-        message.setSubject("YSocial: Код подтверждения регистрации");
-        message.setText("Добро пожаловать в YSocial!\n\n" +
-                "Ваш код подтверждения: " + code + "\n\n" +
-                "Введите этот код в приложении для завершения регистрации. " +
-                "Код действителен в течение 15 минут.");
+//        message.setFrom("denis123984@yandex.ru");
+//        message.setTo(toEmail);
+//        message.setSubject("YSocial: Код подтверждения регистрации");
+//        message.setText("Добро пожаловать в YSocial!\n\n" +
+//                "Ваш код подтверждения: " + code + "\n\n" +
+//                "Введите этот код в приложении для завершения регистрации. " +
+//                "Код действителен в течение 15 минут.");
+
+        mailMessage.setFrom("denis123984@yandex.ru");
+        mailMessage.setTo(toEmail);
+        mailMessage.setSubject("YSocial: Регистрация");
+        mailMessage.setText(message);
 
         try {
-            mailSender.send(message);
+            mailSender.send(mailMessage);
         } catch (Exception e) {
             // нет смысла кидать исключение так как это фоновый поток, а основной поток
             // уже закончил работу

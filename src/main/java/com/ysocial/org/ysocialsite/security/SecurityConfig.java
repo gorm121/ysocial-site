@@ -56,7 +56,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/login",           
                                 "/register",        
-                                "/verify",          
+                                "/verify",
+                                "/activate/**",
                                 "/style/**",        
                                 "/images/**",
                                 "/favicon.ico",

@@ -6,6 +6,7 @@ import com.ysocial.org.ysocialsite.dto.request.VerifyRequest;
 import com.ysocial.org.ysocialsite.entities.Profile;
 import com.ysocial.org.ysocialsite.entities.User;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
+import com.ysocial.org.ysocialsite.exceptions.AccountActivateException;
 import com.ysocial.org.ysocialsite.exceptions.BadRequestException;
 import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 import com.ysocial.org.ysocialsite.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -46,7 +48,7 @@ public class AuthService {
         }
         String hashPassword = passwordEncoder.encode(request.getPassword());
 
-        String code = generateCode();
+        String code = UUID.randomUUID().toString();
 
         User user = new User();
         user.setUsername(username);
@@ -57,7 +59,42 @@ public class AuthService {
 
         userRepository.save(user);
 
-        emailService.sendVerificationCode(email, code);
+        String message = String.format(
+                """
+                Привет, %s!\s
+                Добро пожаловать. Для активации аккаунта перейди по ссылке:\s
+                http://localhost:8081/activate/%s
+                """,
+                user.getUsername(),
+                user.getCode()
+        );
+
+        emailService.sendVerificationCode(email, "Активация аккаунта" ,message);
+    }
+
+    @Transactional
+    public void activateAccount(String code) {
+        User user = userRepository.findByCode(code)
+                .orElseThrow(() -> new AccountActivateException("Неверный код активации"));
+
+        if (user.getStatus() == AccountStatus.ACTIVE) {
+            throw new AccountActivateException("Аккаунт уже активен");
+        }
+
+        if (user.getExpiryCode().isBefore(LocalDateTime.now())) {
+            throw new AccountActivateException("Код истек, вернитесь на страницу регистрации и попробуйте снова");
+        }
+
+        Profile profile = new Profile();
+        profile.setUserId(user.getId());
+        profile.setFirstName(user.getUsername());
+        profile.setLastName("");
+
+        user.setProfile(profile);
+        user.setExpiryCode(null);
+        user.setCode(null);
+        user.setStatus(AccountStatus.ACTIVE);
+        userRepository.save(user);
     }
 
     @Transactional
