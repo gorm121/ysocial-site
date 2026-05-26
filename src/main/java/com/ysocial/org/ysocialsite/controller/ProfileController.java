@@ -45,7 +45,7 @@ public class ProfileController {
 
         model.addAttribute("profile", profileDto);
         model.addAttribute("isOwnProfile", true);
-        return "html/profile";
+        return "profile";
     }
 
     @GetMapping("/{id}")
@@ -57,15 +57,14 @@ public class ProfileController {
         model.addAttribute("profile", profileDto);
         
         model.addAttribute("isOwnProfile", profileDto.isOwnProfile());
-        log.info(String.valueOf(profileDto.isOwnProfile()));
-        return "html/profile";
+        return "profile";
     }
 
     @GetMapping("/edit-form")
     public String getEditProfileForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         ProfileDto profileDto = profileService.getMyProfile(userDetails);
         model.addAttribute("profile", profileDto);
-        return "html/profile :: edit-modal-fragment";
+        return "profile :: edit-modal-fragment";
     }
 
     @PutMapping
@@ -84,7 +83,7 @@ public class ProfileController {
             String errorMsg = bindingResult.getFieldErrors().getFirst().getDefaultMessage();
             model.addAttribute("message", errorMsg);
 
-            return "html/fragments :: error-toast";
+            return "fragments :: error-toast";
         }
         profileService.updateProfile(userDetails, request, avatar);
         response.setHeader("HX-Redirect", "/profiles");
@@ -96,7 +95,7 @@ public class ProfileController {
                                     Model model) {
         ProfileDto profileDto = profileService.getMyProfile(userDetails);
         model.addAttribute("profile", profileDto);
-        return "html/profile :: create-post-modal-fragment";
+        return "profile :: create-post-modal-fragment";
     }
     @GetMapping("/people")
     public String getPeople(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -104,7 +103,7 @@ public class ProfileController {
     ) {
         ProfileDto profileDto = profileService.getMyProfile(userDetails);
         model.addAttribute("profile", profileDto);
-        return "html/people";
+        return "people";
     }
 
 
@@ -120,6 +119,6 @@ public class ProfileController {
         model.addAttribute("results", results);
         model.addAttribute("profile", profileService.getMyProfile(userDetails));
 
-        return "html/people";
+        return "people";
     }
 }

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{html/layout :: head('Лента Ysocial', true)}"></head>
+<head th:replace="~{layout :: head('Лента Ysocial', true)}"></head>
 <body>
 
-    <header th:replace="~{html/layout :: main-header(${avatarUrl})}"></header>
+    <header th:replace="~{layout :: main-header(${avatarUrl})}"></header>
 
     <div class="main-layout">
         
-        <aside th:replace="~{html/layout :: sidebar('feed')}"></aside>
+        <aside th:replace="~{layout :: sidebar('feed')}"></aside>
 
         <main class="feed-container" id="feed-container">
             <th:block th:fragment="post-chunk" th:if="${posts != null}">
@@ -38,7 +38,7 @@
 
                         <div class="post-footer">
                             <div th:text="${post.createdAt}"></div>
-                            <div th:replace="~{html/post_components :: vote-fragment(post=${post})}"></div>
+                            <div th:replace="~{post_components :: vote-fragment(post=${post})}"></div>
                         </div>
                     </div>
 
@@ -50,7 +50,7 @@
                         в следствии к какому списку комментов относится созданный коммент-->
                         <div class="comments-list" th:id="'comments-list-' + ${post.id}">
                             <th:block th:each="c : ${post.comments}">
-                                <div th:replace="~{html/post_components :: comment-item(comment=${c})}"></div>
+                                <div th:replace="~{post_components :: comment-item(comment=${c})}"></div>
                             </th:block>
                         </div>
                         <!-- поле для отправки коммента, кидаем POST-запрос по id поста,
@@ -101,6 +101,6 @@
             </th:block>        
         </main>
     </div>
-    <th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+    <th:block th:replace="~{layout :: htmx-scripts}"></th:block>
 </body>
 </html>

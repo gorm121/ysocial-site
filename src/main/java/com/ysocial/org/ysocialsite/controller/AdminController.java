@@ -42,7 +42,7 @@ public class AdminController {
                           @PathVariable Long userId
     ) {
         userService.banUser(userDetails, userId);
-        return "html/banned_profile";
+        return "banned_profile";
     }
 
 }

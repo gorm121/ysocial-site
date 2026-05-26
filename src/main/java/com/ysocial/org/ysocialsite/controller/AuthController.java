@@ -36,18 +36,18 @@ public class AuthController {
                                 HttpServletResponse response
     ) {
         authService.register(user);
-        return "html/registration-success";
+        return "registration-success";
     }
 
     @GetMapping("/activate/{code}")
     public String activateAccount(@PathVariable String code){
         authService.activateAccount(code);
-        return "html/activation-success";
+        return "activation-success";
     }
 
 
     @GetMapping("/login")
     public String showLoginForm(Model model) {
-        return "html/login";
+        return "login";
     }
 }

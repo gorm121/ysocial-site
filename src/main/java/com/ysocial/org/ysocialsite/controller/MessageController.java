@@ -34,7 +34,7 @@ public class MessageController {
         model.addAttribute("chats", messageService.getChats(userDetails));
         model.addAttribute("chat", null);
         model.addAttribute("selectedChatId", 0L);
-        return "html/messages";
+        return "messages";
     }
     @GetMapping("/{id}")
     public String getChatOrCreate(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -47,7 +47,7 @@ public class MessageController {
         model.addAttribute("currentUserId", profileService.getMyProfile(userDetails).id());
         model.addAttribute("selectedChatId", chat.chatId());
         model.addAttribute("chats", messageService.getChats(userDetails));
-        return "html/messages";
+        return "messages";
     }
 
     @PostMapping("/chat/{chatId}/send")
@@ -64,6 +64,6 @@ public class MessageController {
         model.addAttribute("message", m);
 
 
-        return "html/messages :: message-fragment";
+        return "messages :: message-fragment";
     }
 }

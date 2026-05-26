@@ -1,117 +1,63 @@
--- ==================== ТЕСТОВЫЕ ПОЛЬЗОВАТЕЛИ ====================
+-- Очищаем таблицы перед вставкой, чтобы при повторном запуске не было дублей
+TRUNCATE TABLE users, profiles, posts, comments, post_reactions, friendships, chats, messages RESTART IDENTITY CASCADE;
 
--- 1. Супер-админ
-INSERT INTO users (username, email, password_hash, role, status)
-VALUES (
-           'superadmin',
-           'superadmin@example.com',
-           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
-           'SUPER_ADMIN',
-           'ACTIVE'
-       );
+-- 1. Пользователи
+INSERT INTO users (id, username, email, password_hash, role, status) VALUES
+(1, 'admin_neo', 'neo@matrix.com', '$2a$12$J.EMR9WFk/jiOE3dDV4t7uklAeh41ecqVha0XAbxzkJo4RbpOcUj6', 'SUPER_ADMIN', 'ACTIVE'),
+(2, 'alice_wonder', 'alice@example.com', '$2a$12$J.EMR9WFk/jiOE3dDV4t7uklAeh41ecqVha0XAbxzkJo4RbpOcUj6', 'USER', 'ACTIVE'),
+(3, 'bob_builder', 'bob@example.com', '$2a$12$J.EMR9WFk/jiOE3dDV4t7uklAeh41ecqVha0XAbxzkJo4RbpOcUj6', 'USER', 'ACTIVE'),
+(4, 'charlie_chap', 'charlie@example.com', '$2a$12$J.EMR9WFk/jiOE3dDV4t7uklAeh41ecqVha0XAbxzkJo4RbpOcUj6', 'USER', 'BANNED');
 
-INSERT INTO profiles (user_id, first_name, last_name, city, birth_date, bio, is_private)
-VALUES (
-           (SELECT id FROM users WHERE username = 'superadmin'),
-           'Admin',
-           'Super',
-           'Москва',
-           '1990-01-01',
-           'Главный администратор системы',
-           false
-       );
+-- 2. Профили
+INSERT INTO profiles (user_id, first_name, last_name, city, birth_date, bio, is_private) VALUES
+(1, 'Томас', 'Андерсон', 'Нью-Йорк', '1999-03-31', 'Следуй за белым кроликом.', false),
+(2, 'Алиса', 'Селезнева', 'Москва', '2010-10-18', 'Люблю путешествовать во времени и космосе.', false),
+(3, 'Боб', 'Строитель', 'Лондон', '1998-11-28', 'Можем ли мы это починить? Да, мы можем!', true),
+(4, 'Чарли', 'Браун', 'Чикаго', '2005-02-14', 'Заблокированный пользователь за спам.', false);
 
--- ==================== 2. Модератор ====================
-INSERT INTO users (username, email, password_hash, role, status)
-VALUES (
-           'moderator',
-           'moderator@example.com',
-           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
-           'MODERATOR',
-           'ACTIVE'
-       );
+-- 3. Посты
+INSERT INTO posts (id, author_id, content) VALUES
+(1, 2, 'Сегодня отличная погода для прогулки по парку! ☀️'),
+(2, 3, 'Кто-нибудь знает хороший рецепт пиццы? Срочно нужно для вечеринки.'),
+(3, 1, 'Система обновлена до версии 2.0. Все баги (надеюсь) пофикшены.'),
+(4, 2, 'Мой кот опять скинул цветок с подоконника... Классика.');
 
-INSERT INTO profiles (user_id, first_name, last_name, city, birth_date, bio, is_private)
-VALUES (
-           (SELECT id FROM users WHERE username = 'moderator'),
-           'Modest',
-           'Moderatorov',
-           'Санкт-Петербург',
-           '1992-05-15',
-           'Модератор контента',
-           false
-       );
+-- 4. Комментарии
+INSERT INTO comments (id, post_id, author_id, text) VALUES
+(1, 1, 3, 'Завидую, у нас тут дождь весь день.'),
+(2, 2, 2, 'Возьми готовое тесто, не мучайся!'),
+(3, 3, 2, 'Ура! Наконец-то работает загрузка аватарок.'),
+(4, 4, 1, 'Коты — это хаос во плоти.');
 
--- ==================== 3. Обычный пользователь ====================
-INSERT INTO users (username, email, password_hash, role, status)
-VALUES (
-           'user',
-           'user@example.com',
-           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
-           'USER',
-           'ACTIVE'
-       );
+-- 5. Реакции (Лайки)
+INSERT INTO post_reactions (id, post_id, user_id, type) VALUES
+(1, 1, 3, 'LIKE'),
+(2, 1, 1, 'LIKE'),
+(3, 2, 2, 'LIKE'),
+(4, 4, 3, 'LIKE');
 
-INSERT INTO profiles (user_id, first_name, last_name, city, birth_date, bio, is_private)
-VALUES (
-           (SELECT id FROM users WHERE username = 'user'),
-           'Ivan',
-           'Ivanov',
-           'Екатеринбург',
-           '1995-08-20',
-           'Обычный пользователь соцсети',
-           true
-       );
+-- 6. Друзья
+INSERT INTO friendships (id, requester_id, addressee_id, status) VALUES
+(1, 2, 3, 'ACCEPTED'),
+(2, 1, 2, 'ACCEPTED'),
+(3, 3, 1, 'PENDING');
 
--- ==================== 4. Дополнительный пользователь для теста дружбы ====================
-INSERT INTO users (username, email, password_hash, role, status)
-VALUES (
-           'friend',
-           'friend@example.com',
-           '$2a$12$Fl1NgaHZSjVCqqXVgx5sdusvo.2mXd9TOQgZQcAfo.EPWAdYH/vCi', -- пароль: admin123
-           'USER',
-           'ACTIVE'
-       );
+-- 7. Чаты
+INSERT INTO chats (id, user1, user2, last_message_text) VALUES
+(1, 2, 3, 'Да, давай в 19:00.'),
+(2, 1, 2, 'Привет, как дела с новым функционалом?');
 
-INSERT INTO profiles (user_id, first_name, last_name, city, birth_date, bio, is_private)
-VALUES (
-           (SELECT id FROM users WHERE username = 'friend'),
-           'Petr',
-           'Petrov',
-           'Новосибирск',
-           '1993-03-10',
-           'Друг для теста дружбы',
-           false
-       );
+-- 8. Сообщения
+INSERT INTO messages (id, chat_id, sender_id, recipient_id, content, is_read) VALUES
+(1, 1, 3, 2, 'Идем сегодня в кино?', true),
+(2, 1, 2, 3, 'Да, давай в 19:00.', false),
+(3, 2, 1, 2, 'Привет, как дела с новым функционалом?', true);
 
--- ==================== ТЕСТОВЫЕ ПОСТЫ ====================
-
--- Посты от пользователя 'user'
-INSERT INTO posts (author_id, content)
-VALUES
-    ((SELECT id FROM users WHERE username = 'user'), 'Мой первый пост в этой соцсети!'),
-    ((SELECT id FROM users WHERE username = 'user'), 'Сегодня отличная погода для прогулки ☀️'),
-    ((SELECT id FROM users WHERE username = 'user'), 'Изучаю SQL и базы данных. Очень интересно!');
-
--- Посты от пользователя 'friend'
-INSERT INTO posts (author_id, content)
-VALUES
-    ((SELECT id FROM users WHERE username = 'superadmin'), 'Привет всем! Я только что зарегистрировался.'),
-    ((SELECT id FROM users WHERE username = 'friend'), 'Люблю программировать по вечерам 💻');
-
--- ==================== ТЕСТОВАЯ ДРУЖБА ====================
-
--- user отправляет запрос в друзья friend
-INSERT INTO friendships (requester_id, addressee_id, status)
-VALUES (
-           (SELECT id FROM users WHERE username = 'user'),
-           (SELECT id FROM users WHERE username = 'friend'),
-           'ACCEPTED'
-       );
-
-INSERT INTO friendships (requester_id, addressee_id, status)
-VALUES (
-    (SELECT id FROM users WHERE username = 'superadmin'),
-    (SELECT id FROM users WHERE username = 'moderator'),
-    'PENDING'
-);
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+SELECT setval('profiles_user_id_seq', (SELECT MAX(user_id) FROM profiles));
+SELECT setval('posts_id_seq', (SELECT MAX(id) FROM posts));
+SELECT setval('comments_id_seq', (SELECT MAX(id) FROM comments));
+SELECT setval('post_reactions_id_seq', (SELECT MAX(id) FROM post_reactions));
+SELECT setval('friendships_id_seq', (SELECT MAX(id) FROM friendships));
+SELECT setval('chats_id_seq', (SELECT MAX(id) FROM chats));
+SELECT setval('messages_id_seq', (SELECT MAX(id) FROM messages));

@@ -260,7 +260,7 @@ public class PostService {
                             return new CommentResponse(c, toProfileInPostDto(commentAuthor));
                         }).toList())
                 .createdAt(post.getCreatedAt() != null ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("d MMMM, HH:mm")) : "")
-                .imageUrl("/images/default-avatar.png")
+                .imageUrl(null)
                 .build();
     }
 

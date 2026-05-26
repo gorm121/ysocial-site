@@ -48,9 +48,9 @@ public class PostController {
         model.addAttribute("posts", postPage);
 
         if (isHtmxRequest) {
-            return "html/feed :: post-chunk";
+            return "feed :: post-chunk";
         }
-        return "html/feed";
+        return "feed";
     }
 
     @GetMapping
@@ -70,7 +70,7 @@ public class PostController {
         boolean isOwnProfile = userDetails.getId().equals(userId);
         model.addAttribute("isOwnProfile", isOwnProfile);
 
-        return "html/profile :: post-chunk";
+        return "profile :: post-chunk";
     }
     
     @PostMapping("/{postId}/reaction")
@@ -82,7 +82,7 @@ public class PostController {
     ) {
         PostResponse result = postService.processReaction(userDetails, postId, type);
         model.addAttribute("post", result);
-        return "html/post_components :: vote-fragment";
+        return "post_components :: vote-fragment";
     }
 
 
@@ -95,7 +95,7 @@ public class PostController {
         // если вылетело исключение то покажем ошибку в углу
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getFieldErrors());
-            return "html/profile :: create-post-modal-fragment";
+            return "profile :: create-post-modal-fragment";
         }
         boolean isCreated = postService.createPost(userDetails, request, image);
         // пост создался то релоад страницы
@@ -104,7 +104,7 @@ public class PostController {
         }
         // если вдруг не создался, в теории наверное такое может произойти
         model.addAttribute("errors", "Не удалось создать пост");
-        return "html/profile :: create-post-modal-fragment";
+        return "profile :: create-post-modal-fragment";
     }
 
     @DeleteMapping("/{postId}")

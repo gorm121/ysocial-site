@@ -33,7 +33,7 @@ public class CommentController {
     ) {
         CommentResponse comment = commentService.createComment(userDetails, postId, text);
         model.addAttribute("comment", comment);
-        return "html/post_components :: comment-item";
+        return "post_components :: comment-item";
     }
 
     @DeleteMapping("/{commentId}")
@@ -41,6 +41,6 @@ public class CommentController {
                                 @PathVariable("commentId") Long commentId
     ) {
         commentService.deleteComment(userDetails, commentId);
-        return "html/fragments :: empty-fragment";
+        return "fragments :: empty-fragment";
     }
 }

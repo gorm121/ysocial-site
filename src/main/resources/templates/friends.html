@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{html/layout :: head('Друзья', true)}"></head>
+<head th:replace="~{layout :: head('Друзья', true)}"></head>
 <body>
-    <header th:replace="~{html/layout :: main-header(${profile.avatarUrl != null ? profile.avatarUrl : ''})}"></header>
+    <header th:replace="~{layout :: main-header(${profile.avatarUrl != null ? profile.avatarUrl : ''})}"></header>
 
     <div class="main-layout">
-        <aside th:replace="~{html/layout :: sidebar('friends')}"></aside>
+        <aside th:replace="~{layout :: sidebar('friends')}"></aside>
 
         <main class="profile-container" style="max-width:1100px;">
             <div class="profile-card" style="margin-bottom:30px;">
@@ -13,19 +13,19 @@
                 <div id="requestsList" class="friend-requests-list">
                     <th:block th:if="${requests != null and !requests.empty}">
                         <th:block th:each="r : ${requests}">
-                            <div th:replace="~{html/friends_components :: friend-request-item(request=${r})}"></div>
+                            <div th:replace="~{friends_components :: friend-request-item(request=${r})}"></div>
                         </th:block>
                     </th:block>
                 </div>
-                <div id="requestsEmpty" th:if="${requests == null or requests.empty}" style="display: block; color:#777; padding:10px 0;">Заявок нет</div>
+                <div id="requestsEmpty" th:if="${requests == null or requests.isEmpty()}" style="display: block; color:#777; padding:10px 0;">Заявок нет</div>
             </div>
 
             <div class="profile-card">
                 <h2 style="font-size:20px; margin-bottom:20px;">Мои друзья</h2>
                 <div id="friendsList" class="friends-list">
-                    <th:block th:if="${friends != null and !friends.empty}">
+                    <th:block th:if="${friends != null and !friends.isEmpty()}">
                         <th:block th:each="f : ${friends}">
-                            <div th:replace="~{html/friends_components :: friend-item(friend=${f})}"></div>
+                            <div th:replace="~{friends_components :: friend-item(friend=${f})}"></div>
                         </th:block>
                     </th:block>
                 </div>
@@ -37,6 +37,6 @@
         </main>
     </div>
 
-    <th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+    <th:block th:replace="~{layout :: htmx-scripts}"></th:block>
 </body>
 </html>

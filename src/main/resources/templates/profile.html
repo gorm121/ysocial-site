@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
-<head th:replace="~{html/layout :: head('Профиль Ysocial', true)}"></head>
+<head th:replace="~{layout :: head('Профиль Ysocial', true)}"></head>
 <body>
 
-    <header th:replace="~{html/layout :: main-header(avatarUrl=${profile != null ? profile.avatarUrl : '/images/default-avatar.png'})}"></header>
+    <header th:replace="~{layout :: main-header(avatarUrl=${profile != null ? profile.avatarUrl : '/images/default-avatar.png'})}"></header>
 
         <div class="main-layout">
-            <aside th:replace="~{html/layout :: sidebar(${isOwnProfile} ? 'profile' : null)}"></aside>
+            <aside th:replace="~{layout :: sidebar(${isOwnProfile} ? 'profile' : null)}"></aside>
 
             <main class="profile-container">
                 <div class="profile-card" th:if="${profile != null}">
@@ -174,7 +174,7 @@
                                 заменяет его с нужными данными поста (тут если что мы в цикле постов)-->
                                 <div class="post-footer">
                                     <div class="post-date" th:text="${post.createdAt}"></div>
-                                    <div th:replace="~{html/post_components :: vote-fragment(post=${post})}"></div>
+                                    <div th:replace="~{post_components :: vote-fragment(post=${post})}"></div>
                                 </div>
                             </div>
                                                                             <!-- можно сказать что мы вызываем функцию, которая рисует нам то что нужно -->
@@ -183,7 +183,7 @@
                                 <!-- с комментами то же самое что и с лайками -->
                                 <div class="comments-list" th:id="'comments-list-' + ${post.id}">
                                     <th:block th:each="c : ${post.comments}">
-                                        <div th:replace="~{html/post_components :: comment-item(comment=${c})}"></div>
+                                        <div th:replace="~{post_components :: comment-item(comment=${c})}"></div>
                                     </th:block>
                                 </div>
 
@@ -315,6 +315,6 @@
                 </script>
             </th:block>
         </th:block>
-    <th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+    <th:block th:replace="~{layout :: htmx-scripts}"></th:block>
 </body>
 </html>

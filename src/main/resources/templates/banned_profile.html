@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{html/layout :: head('Профиль заблокирован', true)}"></head>
+<head th:replace="~{layout :: head('Профиль заблокирован', true)}"></head>
 <body>
 
-<header th:replace="~{html/layout :: main-header(avatarUrl=${currentUserAvatar ?: '/images/default-avatar.png'})}"></header>
+<header th:replace="~{layout :: main-header(avatarUrl=${currentUserAvatar ?: '/images/default-avatar.png'})}"></header>
 
 <div class="main-layout">
-    <aside th:replace="~{html/layout :: sidebar('profile')}"></aside>
+    <aside th:replace="~{layout :: sidebar('profile')}"></aside>
 
     <main class="profile-container">
         <div class="profile-card" style="text-align: center; padding: 60px 20px;">
@@ -28,6 +28,6 @@
     </main>
 </div>
 
-<th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+<th:block th:replace="~{layout :: htmx-scripts}"></th:block>
 </body>
 </html>

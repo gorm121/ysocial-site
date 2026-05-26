@@ -22,13 +22,13 @@ public class GlobalExceptionHandler {
     {
         model.addAttribute("errorMessage", ex.getMessage());
 
-        return "html/activation-error";
+        return "activation-error";
     }
 
     @ExceptionHandler(UserBannedException.class)
     public String handleUserBanned(UserBannedException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
-        return "html/banned_profile";
+        return "banned_profile";
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         String cleanMsg = ex.getConstraintViolations().iterator().next().getMessage();
         model.addAttribute("message", cleanMsg);
 
-        return "html/fragments :: error-toast";
+        return "fragments :: error-toast";
     }
 
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
         model.addAttribute("message", ex.getMessage());
 
-        return "html/fragments :: error-toast";
+        return "fragments :: error-toast";
     }
 
 
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
             response.setHeader("HX-Retarget", "body");
             response.setHeader("HX-Reswap", "beforeend");
 
-            return "html/fragments :: error-toast";
+            return "fragments :: error-toast";
         }
 
 
@@ -89,7 +89,7 @@ public class GlobalExceptionHandler {
         // иначе отдаем страницу not_found, ну если например чел попытался
         // в адресной строке вписать "../profiles/10" - а такого профиля нет
         model.addAttribute("message", ex.getMessage());
-        return "html/not_found";
+        return "not_found";
     }
 
     @ExceptionHandler(BindException.class)
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
         String cleanMsg = ex.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
         model.addAttribute("message", cleanMsg);
 
-        return "html/fragments :: error-toast";
+        return "fragments :: error-toast";
     }
 
     public record ErrorResponse(HttpStatus status, String message, LocalDateTime timestamp) {}

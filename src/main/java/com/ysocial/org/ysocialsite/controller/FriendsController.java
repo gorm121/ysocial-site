@@ -39,7 +39,7 @@ public class FriendsController {
         model.addAttribute("friends", friends);
         model.addAttribute("profile", profileService.getMyProfile(userDetails));
                                         
-        return "html/friends";
+        return "friends";
     }
 
     @PostMapping("/request/{userId}/send")
@@ -52,7 +52,7 @@ public class FriendsController {
         model.addAttribute("status", FriendshipStatus.PENDING);
         model.addAttribute("userId", userId);
         model.addAttribute("isOwnProfile", false);
-        return "html/profile :: friend-button";
+        return "profile :: friend-button";
     }
 
     @PostMapping("/request/{userId}/accept")
@@ -63,7 +63,7 @@ public class FriendsController {
         model.addAttribute("status", FriendshipStatus.ACCEPTED);
         model.addAttribute("userId", userId);
         model.addAttribute("isOwnProfile", false);
-        return "html/profile :: friend-button";
+        return "profile :: friend-button";
     }
 
     @DeleteMapping("/{userId}/remove")
@@ -75,7 +75,7 @@ public class FriendsController {
         model.addAttribute("status", null);
         model.addAttribute("userId", userId);
         model.addAttribute("isOwnProfile", false);
-        return "html/profile :: friend-button";
+        return "profile :: friend-button";
     }
 
     @DeleteMapping("/request/{userId}/reject")
@@ -88,6 +88,6 @@ public class FriendsController {
         model.addAttribute("userId", userId);
         model.addAttribute("isOwnProfile", false);
 
-        return "html/profile :: friend-button";
+        return "profile :: friend-button";
     }
 }

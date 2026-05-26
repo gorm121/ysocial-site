@@ -103,7 +103,6 @@ body {
 
 .avatar-container { position: relative; display: inline-block; }
 .dropdown-menu {
-    /* Меняем display: none на управление видимостью и прозрачностью */
     opacity: 0;
     visibility: hidden;
 
@@ -119,21 +118,19 @@ body {
     z-index: 1000;
     transform-origin: top right;
 
-    /* Плавность скрытия: добавляем задержку в 0.3 секунды перед закрытием */
     transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
     transition-delay: 0.3s;
 
-    transform: scale(0.9); /* Небольшое уменьшение для красивого эффекта */
+    transform: scale(0.9);
 }
 
-/* При наведении на аватар или САМО МЕНЮ */
+
 .avatar-container:hover .dropdown-menu,
 .dropdown-menu:hover {
     opacity: 1;
     visibility: visible;
     transform: scale(1);
 
-    /* При наведении задержка НЕ нужна — меню откроется мгновенно */
     transition-delay: 0s;
 }
 
@@ -806,7 +803,24 @@ input {
     width: 100%;
 }
 
+.modal-textarea {
+    width: 100%;
+    padding: 14px 20px;
+    background-color: var(--bg-input);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    outline: none;
 
+    resize: vertical;
+    min-height: 100px;
+    box-sizing: border-box;
+    display: block;
+    overflow-y: auto;
+
+    font-family: var(--font-main);
+}
 
 
 

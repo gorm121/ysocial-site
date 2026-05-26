@@ -28,5 +28,6 @@ public class Chat {
     private String lastMessageText;
 
     @CreatedDate
+    @Builder.Default
     private LocalDateTime lastSent = LocalDateTime.now();
 }

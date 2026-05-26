@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{html/layout :: head('Регистрация', true)}"></head>
+<head th:replace="~{layout :: head('Регистрация', true)}"></head>
 <body>
     <header class="app-header">
         <div class="header-logo"><div class="logo-icon small">Y</div></div>
@@ -41,6 +41,6 @@
             </div>
         </div>
     </main>
-    <th:block th:replace="~{html/layout :: htmx-scripts}"></th:block>
+    <th:block th:replace="~{layout :: htmx-scripts}"></th:block>
 </body>
 </html>
