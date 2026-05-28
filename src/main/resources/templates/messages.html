@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Сообщения', true)}"></head>
+<body>
+    <header th:replace="~{layout :: main-header(${profile != null ? profile.avatarUrl : ''})}"></header>
+
+    <div class="main-layout">
+        <aside th:replace="~{layout :: sidebar('messages')}"></aside>
+
+        <main class="messaging-layout">
+            <!-- Панель списка чатов -->
+            <div class="chats-panel">
+                <div class="chats-header">Сообщения</div>
+                <div class="chats-list">
+                    <div th:each="chat : ${chats}" 
+                         th:if="${chat.userId != null}"
+                         class="chat-item" 
+                         th:classappend="${chat.chatId == selectedChatId} ? 'active' : ''"
+                         th:hx-get="@{/messages/{id}(id=${chat.userId})}" 
+                         hx-target="body"  
+                         hx-push-url="true">
+                        <div class="chat-avatar" th:style="'background-image: url(' + ${chat.avatarUrl} + ')'"></div>
+                        <div class="chat-info">
+                            <div class="chat-name" th:text="${chat.name}">Имя</div>
+                            <div class="chat-last-message" th:text="${chat.lastMessage}">Последнее сообщение</div>
+                        </div>
+                        <!-- <div class="chat-time" >12:34</div> -->
+                    </div>
+                    <div th:if="${#lists.isEmpty(chats)}" class="empty-chat" style="padding: 20px; text-align: center;">
+                        У вас пока нет диалогов
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно выбранного чата  -->
+            <div th:if="${chat != null}" id="chat-window" class="chat-window" th:fragment="chat-window">
+                <a th:href="@{/profiles/{id}(id=${chat.userId})}">
+                    <div class="chat-header">
+                        <div class="chat-avatar" th:style="'background-image: url(' + ${chat.avatarUrl} + ')'"></div>
+                        <div class="chat-name" th:text="${chat.name}">Имя собеседника</div>
+                    </div>
+                </a>
+
+                <div class="messages-area" id="messagesArea">
+                    <th:block th:each="message : ${chat.messages}">
+                            <div th:replace="~{::message-fragment(message=${message})}"></div>
+                    </th:block>
+                </div>
+
+                <div class="message-input-area">
+                    <input type="text" 
+                        class="message-input" 
+                        placeholder="Введите сообщение..." 
+                        id="messageInput"
+                        name="message" 
+                        th:hx-post="@{/messages/chat/{id}/send(id=${chat.chatId})}" 
+                        hx-trigger="keyup[key=='Enter']"  
+                        hx-target="#messagesArea"   
+                        hx-swap="beforeend scroll:#messagesArea:bottom"
+                        hx-on::after-request="if(event.detail.successful) this.value = ''"
+                        hx-on::before-request="if(this.value.trim() === '') event.preventDefault()">
+
+                    <button class="send-btn" 
+                            type="button"
+                            th:hx-post="@{/messages/chat/{id}/send(id=${chat.chatId})}" 
+                            hx-target="#messagesArea" 
+                            hx-swap="beforeend scroll:#messagesArea:bottom"
+                            hx-include="#messageInput"
+                            hx-on::after-request="if(event.detail.successful) document.getElementById('messageInput').value = ''"
+                            hx-on::before-request="if(document.getElementById('messageInput').value.trim() === '') event.preventDefault()">
+                        Отправить
+                    </button>
+                </div>
+            </div>
+
+            <div th:if="${chat == null}" class="empty-chat">
+                <h2>Выберите чат</h2>
+                <p>Нажмите на диалог слева, чтобы начать переписку</p>
+            </div>
+        </main>
+    </div>
+        <div th:fragment="message-fragment(message)" 
+            th:if="${message != null}" 
+            th:with="isOutgoing=${#strings.toString(message.senderId) == #strings.toString(currentUserId)}"
+            class="message" 
+            th:classappend="${isOutgoing ? 'outgoing' : 'incoming'}">
+            
+            <div class="message-avatar" 
+                th:style="'background-image: url(' + (${isOutgoing ? message.currentUserAvatarUrl : message.avatarUrl}) + ')'">
+            </div>
+
+            <div class="message-bubble">
+                <div class="message-text" th:text="${message.text}">Текст сообщения</div>
+                <div class="message-time" th:text="${message.sentAt}">12:34</div>
+            </div>
+        </div>
+
+    <th:block th:replace="~{layout :: htmx-scripts}"></th:block>
+</body>
+</html>
