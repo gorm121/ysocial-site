@@ -11,35 +11,44 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final String fromEmail = "denis123984@yandex.ru";
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
+
     @Async
-    public void sendVerificationCode(String toEmail, String subject, String message) {
+    public void sendSimpleMessage(String toEmail, String subject, String text) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-
-//        message.setFrom("denis123984@yandex.ru");
-//        message.setTo(toEmail);
-//        message.setSubject("YSocial: Код подтверждения регистрации");
-//        message.setText("Добро пожаловать в YSocial!\n\n" +
-//                "Ваш код подтверждения: " + code + "\n\n" +
-//                "Введите этот код в приложении для завершения регистрации. " +
-//                "Код действителен в течение 15 минут.");
-
-        mailMessage.setFrom("denis123984@yandex.ru");
+        mailMessage.setFrom(fromEmail);
         mailMessage.setTo(toEmail);
-        mailMessage.setSubject("YSocial: Регистрация");
-        mailMessage.setText(message);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(text);
 
         try {
             mailSender.send(mailMessage);
+            log.info("Письмо успешно отправлено на {}", toEmail);
         } catch (Exception e) {
-            // нет смысла кидать исключение так как это фоновый поток, а основной поток
-            // уже закончил работу
             log.error("Ошибка при отправке email на {}: {}", toEmail, e.getMessage());
         }
     }
-}
 
+    @Async
+    public void sendFriendRequestNotification(String toEmail, String requesterName) {
+        String subject = "YSocial: Новая заявка в друзья";
+        String text = String.format("Привет! Пользователь %s хочет добавить вас в друзья. " +
+                "Посмотрите вашу страницу заявок на сайте.", requesterName);
+
+        sendSimpleMessage(toEmail, subject, text); 
+    }
+
+    @Async
+    public void sendNewMessageNotification(String toEmail, String senderName) {
+        String subject = "YSocial: Новое личное сообщение";
+        String text = String.format("Привет! Пользователь %s отправил вам личное сообщение. " +
+                "Прочитайте его в разделе диалогов.", senderName);
+
+        sendSimpleMessage(toEmail, subject, text);
+    }
+}

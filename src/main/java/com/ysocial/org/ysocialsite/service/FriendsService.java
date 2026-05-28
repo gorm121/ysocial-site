@@ -24,15 +24,21 @@ import java.util.List;
 public class FriendsService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
     private final StorageService storageService;
+    private final EmailService emailService;
 
     public FriendsService(FriendshipRepository friendshipRepository,
                           UserRepository userRepository,
-                          StorageService storageService)
+                          ProfileRepository profileRepository,
+                          StorageService storageService,
+                          EmailService emailService)
     {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
+        this.profileRepository = profileRepository;
         this.storageService = storageService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -84,9 +90,11 @@ public class FriendsService {
         if (friendshipRepository.existsFriendshipBetween(currentUserId, targetUserId)) {
             throw new BadRequestException("Заявка уже отправлена");
         }
-
+        Profile profile = profileRepository.findByUserId(currentUserId)
+            .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));
         Friendship friendship = new Friendship(targetUserId, currentUserId, FriendshipStatus.PENDING);
         friendshipRepository.save(friendship);
+        emailService.sendFriendRequestNotification(target.getEmail(), profile.getFirstName() + " " + profile.getLastName());
     }
 
     @Transactional

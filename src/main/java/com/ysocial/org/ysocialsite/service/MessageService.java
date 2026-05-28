@@ -28,15 +28,18 @@ public class MessageService {
     private final ChatRepository chatRepository;
     private final ProfileRepository profileRepository;
     private final StorageService storageService;
+    private final EmailService emailService;
 
     public MessageService(MessageRepository messageRepository, 
         ChatRepository chatRepository, 
         ProfileRepository profileRepository,
-        StorageService storageService) {
+        StorageService storageService,
+        EmailService emailService) {
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
         this.profileRepository = profileRepository;
         this.storageService = storageService;
+        this.emailService = emailService;
     }
    
 
@@ -145,6 +148,8 @@ public class MessageService {
         chat.setLastMessageText(mes.getContent());
         chatRepository.save(chat);
         Message savedMessage = messageRepository.save(mes);
+
+        emailService.sendNewMessageNotification(profile.getUserId(), currentProfile.getFirstName() + " " + currentProfile.getLastName());
 
         return new MessageInChatDto(
             savedMessage.getSenderId(),
