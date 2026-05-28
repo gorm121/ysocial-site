@@ -45,4 +45,14 @@ public class AdminController {
         return "banned_profile";
     }
 
+    @GetMapping
+    public String getAdminPage(@AuthenticationPrincipal CustomUserDetails userDetails,Model model
+    ) {
+        List<ProfileShortDto> users = profileService.getProfilesForAdminPage();
+        ProfileDto profile = profileService.getMyProfile(userDetails);
+        model.addAttribute("users", users);
+
+        return "html/admin-page";
+    }
+
 }

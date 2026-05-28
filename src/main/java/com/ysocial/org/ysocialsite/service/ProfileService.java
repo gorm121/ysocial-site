@@ -145,7 +145,11 @@ public class ProfileService {
             .toList();
     }
 
-
+    public List<ProfileShortDto> getProfilesForAdminPage(){
+        List<Profile> profiles = profileRepository.findAll();
+        return profiles.stream().map(this::toProfileInPostDto).toList();
+    }
+    
     public ProfileDto mapToDto(
         Profile profile, 
         Long friendsCount, 
