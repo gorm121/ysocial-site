@@ -3,7 +3,7 @@
 <head th:replace="~{layout :: head('Лента Ysocial', true)}"></head>
 <body>
 
-    <header th:replace="~{layout :: main-header(${avatarUrl})}"></header>
+    <header th:replace="~{layout :: main-header(avatarUrl=${headerAvatarUrl != null ? headerAvatarUrl : '/images/default-avatar.png'})}"></header>
 
     <div class="main-layout">
         

@@ -30,12 +30,19 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
+    private final StorageService storageService;
 
-    public CommentService(PostRepository postRepository, ProfileRepository profileRepository, UserService userService, CommentRepository commentRepository, UserRepository userRepository) {
+    public CommentService(PostRepository postRepository,
+          ProfileRepository profileRepository,
+          UserService userService,
+          CommentRepository commentRepository, 
+          UserRepository userRepository,
+          StorageService storageService) {
         this.postRepository = postRepository;
         this.profileRepository = profileRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     @Transactional
@@ -58,7 +65,9 @@ public class CommentService {
 
         postRepository.save(post);
         String name = profile.getFirstName() + " " + profile.getLastName();
-        String avatarUrl = "/images/default-avatar.png";
+        String avatarUrl = profile.getAvatarUrl() != null && !profile.getAvatarUrl().isEmpty()
+                ? storageService.getAvatarUrl(profile.getAvatarUrl())
+                : "/images/default-avatar.png";
 
         return new CommentResponse(comment, new ProfileShortDto(currentUserId, name, avatarUrl));
     }

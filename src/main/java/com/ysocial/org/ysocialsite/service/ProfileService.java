@@ -35,12 +35,18 @@ public class ProfileService {
     private final FriendshipRepository friendshipRepository;
 
     private final UserService userService;
+    private final StorageService storageService;
 
-    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository, FriendshipRepository friendshipRepository, UserService userService) {
+    public ProfileService(ProfileRepository profileRepository, 
+        UserRepository userRepository, 
+        FriendshipRepository friendshipRepository, 
+        UserService userService,
+        StorageService storageService) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
         this.userService = userService;
+        this.storageService = storageService;
     }
 
     public ProfileDto getMyProfile(CustomUserDetails userDetails) {
@@ -54,7 +60,9 @@ public class ProfileService {
     }
 
      public ProfileDto getProfileById(CustomUserDetails userDetails, Long id) {
-        User viewer = userService.getUserByUserDetails(userDetails);
+        Long viewerId = userDetails.getId();
+        User viewer = userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));
 
         User user = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Профиль не найден"));
@@ -65,10 +73,10 @@ public class ProfileService {
 
         Profile profile = user.getProfile();
         Long friendsCount = friendshipRepository.countFriendshipByUsersAndStatus(user.getId(), user.getId(), FriendshipStatus.ACCEPTED);
-        boolean isOwnProfile = viewer.getId().equals(user.getId());
+        boolean isOwnProfile = viewerId.equals(user.getId());
 
         FriendshipStatus frontendStatus = null;
-        Optional<Friendship> friendshipOpt = friendshipRepository.findFriendshipBetween(viewer.getId(), user.getId());
+        Optional<Friendship> friendshipOpt = friendshipRepository.findFriendshipBetween(viewerId, user.getId());
         // при заходе в чужой профиль нужно показать кнопку для взаимодейтвия (добавить в друзья, удалить из друзей, принять заявку)
         if (friendshipOpt.isPresent()) {
             Friendship f = friendshipOpt.get();
@@ -76,7 +84,7 @@ public class ProfileService {
             if (f.getStatus() == FriendshipStatus.ACCEPTED) {
                 frontendStatus = FriendshipStatus.ACCEPTED;
             } else if (f.getStatus() == FriendshipStatus.PENDING) {
-                if (f.getRequesterId().equals(viewer.getId())) {
+                if (f.getRequesterId().equals(viewerId)) {
                     frontendStatus = FriendshipStatus.PENDING;
                 } else {
                     frontendStatus = FriendshipStatus.RECEIVED;
@@ -101,7 +109,8 @@ public class ProfileService {
         Profile profile = currentUser.getProfile();
 
         if (avatar != null && !avatar.isEmpty()) {
-            profile.setAvatarUrl(null); // временно
+            String savedPath = storageService.uploadAvatar(currentUser.getId(), avatar);
+            profile.setAvatarUrl(savedPath);
         }
 
         profile.setFirstName(request.getFirstName());
@@ -152,7 +161,9 @@ public class ProfileService {
             .birthDate(profile != null && profile.getBirthDate() != null 
                     ? profile.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "не указано")
             .city(profile != null ? profile.getCity() : "не указан")
-            .avatarUrl("/images/default-avatar.png")
+            .avatarUrl(profile != null && profile.getAvatarUrl() != null && !profile.getAvatarUrl().isEmpty() 
+                            ? storageService.getAvatarUrl(profile.getAvatarUrl()) 
+                            : "/images/default-avatar.png")
             .countFriends(friendsCount)
             .isOwnProfile(isOwnProfile)
             .friendStatus(friendStatus)
@@ -175,7 +186,9 @@ public class ProfileService {
             .bio(profile != null ? profile.getBio() : "")
             .birthDate("Скрыто")
             .city("Скрыто")
-            .avatarUrl("/images/default-avatar.png")
+            .avatarUrl(profile != null && profile.getAvatarUrl() != null && !profile.getAvatarUrl().isEmpty() 
+                            ? storageService.getAvatarUrl(profile.getAvatarUrl()) 
+                            : "/images/default-avatar.png")
             .countFriends(friendsCount)
             .isOwnProfile(isOwnProfile)
             .friendStatus(friendStatus)
@@ -186,7 +199,7 @@ public class ProfileService {
 
     public ProfileShortDto toProfileInPostDto(Profile profile) {
         String name = profile.getFirstName() + " " + profile.getLastName();
-        String avatarUrl = "/images/default-avatar.png";
+        String avatarUrl = profile.getAvatarUrl() != null && !profile.getAvatarUrl().isEmpty() ? storageService.getAvatarUrl(profile.getAvatarUrl()) : "/images/default-avatar.png";
         return new ProfileShortDto(profile.getUserId(), name, avatarUrl);
     }
 }

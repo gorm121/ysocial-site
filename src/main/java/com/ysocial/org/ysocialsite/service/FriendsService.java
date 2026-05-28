@@ -24,12 +24,15 @@ import java.util.List;
 public class FriendsService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final StorageService storageService;
 
     public FriendsService(FriendshipRepository friendshipRepository,
-                          UserRepository userRepository)
+                          UserRepository userRepository,
+                          StorageService storageService)
     {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     @Transactional
@@ -39,9 +42,9 @@ public class FriendsService {
         return friendshipRepository.findRequestsWithProfiles(userId)
             .stream().map( f -> 
                 new FriendDto(
-                    f.id(), 
-                    f.name(), 
-                    null,
+                    f.id(),
+                    f.name(),
+                    storageService.getAvatarUrl(f.avatarUrl()),
                     f.addedAt())
                 ).toList();    
     }
@@ -55,7 +58,7 @@ public class FriendsService {
                     return new FriendDto(
                         f.id(),
                         f.name(),
-                        null,
+                        storageService.getAvatarUrl(f.avatarUrl()),
                         f.addedAt()
                     );
                 })

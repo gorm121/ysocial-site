@@ -1,5 +1,6 @@
 package com.ysocial.org.ysocialsite.controller;
 
+
 import com.ysocial.org.ysocialsite.dto.ProfileDto;
 import com.ysocial.org.ysocialsite.dto.request.CreatePostRequest;
 import com.ysocial.org.ysocialsite.dto.response.PostResponse;
@@ -7,12 +8,12 @@ import com.ysocial.org.ysocialsite.enums.ReactionType;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
 import com.ysocial.org.ysocialsite.service.PostService;
 import com.ysocial.org.ysocialsite.service.ProfileService;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,9 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostController {
 
     private final PostService postService;
+    private final ProfileService profileService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, ProfileService profileService) {
         this.postService = postService;
+        this.profileService = profileService;
     }
 
     @GetMapping("/feed")
@@ -41,8 +44,8 @@ public class PostController {
     ) {
         model.addAttribute("page", page);
         model.addAttribute("size", size);
-        String avatarUrl = "/images/default-avatar.png";
-        model.addAttribute("avatarUrl", avatarUrl);
+        ProfileDto myProfile = profileService.getMyProfile(userDetails);
+        model.addAttribute("headerAvatarUrl", myProfile.avatarUrl());
 
         Page<PostResponse> postPage = postService.getFeed(userDetails, page, size);
         model.addAttribute("posts", postPage);

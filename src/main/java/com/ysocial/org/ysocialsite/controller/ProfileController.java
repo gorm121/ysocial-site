@@ -39,24 +39,40 @@ public class ProfileController {
 
     @GetMapping
     public String getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                               Model model
-    ) {
+                               Model model) {
         ProfileDto profileDto = profileService.getMyProfile(userDetails);
 
         model.addAttribute("profile", profileDto);
         model.addAttribute("isOwnProfile", true);
+        
+        // Передаем аватарку специально для шапки сайта
+        model.addAttribute("headerAvatarUrl", profileDto.avatarUrl()); 
+        
         return "profile";
     }
 
     @GetMapping("/{id}")
     public String getProfileById(@AuthenticationPrincipal CustomUserDetails userDetails,
                                 @PathVariable Long id, Model model) {
+                                    
+        //Если пытаемся зайти на свой же профиль по ID -> редирект на чистый /profiles
+        if (userDetails.getId().equals(id)) {
+            return "redirect:/profiles";
+        }
+
         ProfileDto profileDto = profileService.getProfileById(userDetails, id);
+        
+        //Получаем свой профиль, чтобы достать СВОЮ аватарку для шапки
+        ProfileDto myProfile = profileService.getMyProfile(userDetails);
+
         model.addAttribute("status", profileDto.friendStatus());
         model.addAttribute("userId", profileDto.id());
         model.addAttribute("profile", profileDto);
-        
         model.addAttribute("isOwnProfile", profileDto.isOwnProfile());
+        
+        // Передаем СВОЮ аватарку, а не аватарку просматриваемого пользователя
+        model.addAttribute("headerAvatarUrl", myProfile.avatarUrl());
+
         return "profile";
     }
 

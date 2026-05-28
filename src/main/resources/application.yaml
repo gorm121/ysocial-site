@@ -2,6 +2,11 @@ server:
   port: 8081
 spring:
   profiles:
-    active: gorm121
+    active: goos
   application:
     name: ysocial-site
+minio:
+  url: http://localhost:8333/
+  access-key: any
+  secret-key: any
+  bucket-name: photos

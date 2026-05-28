@@ -27,11 +27,16 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
     private final ProfileRepository profileRepository;
+    private final StorageService storageService;
 
-    public MessageService(MessageRepository messageRepository, ChatRepository chatRepository, ProfileRepository profileRepository) {
+    public MessageService(MessageRepository messageRepository, 
+        ChatRepository chatRepository, 
+        ProfileRepository profileRepository,
+        StorageService storageService) {
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
         this.profileRepository = profileRepository;
+        this.storageService = storageService;
     }
    
 
@@ -59,7 +64,8 @@ public class MessageService {
                         chat.getId(),
                         partnerId,
                         partner != null ? partner.getFirstName() + " " + partner.getLastName() : "Unknown",
-                         "/images/default-avatar.png",
+                        partner != null && partner.getAvatarUrl() != null && !partner.getAvatarUrl().isBlank()
+                                ? storageService.getAvatarUrl(partner.getAvatarUrl()) : "/images/default-avatar.png",
                         chat.getLastMessageText()
                     );
                 })
@@ -97,8 +103,8 @@ public class MessageService {
                     m.getSenderId(),    
                     m.getRecipientId(),   
                     m.getContent(),
-                    "/images/default-avatar.png",
-                    "/images/default-avatar.png",
+                    profile.getAvatarUrl() == null ? "/images/default-avatar.png" : storageService.getAvatarUrl(profile.getAvatarUrl()),        
+                    currentProfile.getAvatarUrl() == null ? "/images/default-avatar.png" : storageService.getAvatarUrl(currentProfile.getAvatarUrl()),
                     m.getSentAt().format(DateTimeFormatter.ofPattern("d MMMM, HH:mm"))))
                 .toList();
         } else {
@@ -109,7 +115,7 @@ public class MessageService {
             chat = chatRepository.save(chat); 
         }
 
-        String avatarUrl = "/images/default-avatar.png";
+        String avatarUrl = profile.getAvatarUrl() != null && !profile.getAvatarUrl().isBlank() ? storageService.getAvatarUrl(profile.getAvatarUrl()) : "/images/default-avatar.png";
         return new ChatDto(chat.getId(), userId, name, avatarUrl, messages);
     }
 
@@ -144,8 +150,8 @@ public class MessageService {
             savedMessage.getSenderId(),
             savedMessage.getRecipientId(),
             savedMessage.getContent(),
-            "/images/default-avatar.png",
-            "/images/default-avatar.png",
+            profile.getAvatarUrl() == null ? "/images/default-avatar.png" : storageService.getAvatarUrl(profile.getAvatarUrl()),
+            currentProfile.getAvatarUrl() == null ? "/images/default-avatar.png" : storageService.getAvatarUrl(currentProfile.getAvatarUrl()),
             savedMessage.getSentAt().format(DateTimeFormatter.ofPattern("d MMMM, HH:mm"))
         );
     }

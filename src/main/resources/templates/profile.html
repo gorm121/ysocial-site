@@ -3,7 +3,7 @@
 <head th:replace="~{layout :: head('Профиль Ysocial', true)}"></head>
 <body>
 
-    <header th:replace="~{layout :: main-header(avatarUrl=${profile != null ? profile.avatarUrl : '/images/default-avatar.png'})}"></header>
+<header th:replace="~{layout :: main-header(avatarUrl=${headerAvatarUrl != null ? headerAvatarUrl : '/images/default-avatar.png'})}"></header>
 
         <div class="main-layout">
             <aside th:replace="~{layout :: sidebar(${isOwnProfile} ? 'profile' : null)}"></aside>

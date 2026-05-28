@@ -31,18 +31,21 @@ public class PostService {
     private final ProfileRepository profileRepository;
     private final PostReactionRepository postReactionRepository;
     private final UserRepository userRepository;
+    private final StorageService storageService;
 
     public PostService(PostRepository postRepository,
                        FriendshipRepository friendshipRepository,
                        ProfileRepository profileRepository,
                        PostReactionRepository postReactionRepository,
-                       UserRepository userRepository
+                       UserRepository userRepository,
+                       StorageService storageService
     ) {
         this.postRepository = postRepository;
         this.friendshipRepository = friendshipRepository;
         this.profileRepository = profileRepository;
         this.postReactionRepository = postReactionRepository;
         this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     @Transactional(readOnly = true)
@@ -193,6 +196,7 @@ public class PostService {
                               CreatePostRequest request,
                               MultipartFile image) {
         User currentUser = userDetails.getUser();
+        
 
         Post post = new Post();
         post.setAuthorId(currentUser.getId());
@@ -200,7 +204,8 @@ public class PostService {
         post.setCreatedAt(LocalDateTime.now());
 
         if (image != null && !image.isEmpty()) {
-            post.setImageUrl(null);
+            String savedPath = storageService.uploadPostPhoto(image);
+            post.setImageUrl(savedPath);
         }
 
         postRepository.save(post);
@@ -260,14 +265,14 @@ public class PostService {
                             return new CommentResponse(c, toProfileInPostDto(commentAuthor));
                         }).toList())
                 .createdAt(post.getCreatedAt() != null ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("d MMMM, HH:mm")) : "")
-                .imageUrl(null)
+                .imageUrl(storageService.getPostPhotoUrl(post.getImageUrl()))
                 .build();
     }
 
 
     public ProfileShortDto toProfileInPostDto(Profile profile) {
         String name = profile.getFirstName() + " " + profile.getLastName();
-        String avatarUrl = "/images/default-avatar.png";
+        String avatarUrl = profile.getAvatarUrl() != null && !profile.getAvatarUrl().isEmpty() ? storageService.getAvatarUrl(profile.getAvatarUrl()) : "/images/default-avatar.png";
         return new ProfileShortDto(profile.getUserId(), name, avatarUrl);
     }
 }
