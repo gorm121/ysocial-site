@@ -803,6 +803,227 @@ input {
     width: 100%;
 }
 
+.messaging-layout {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 130px);
+    min-height: 500px;
+}
+
+.chats-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chats-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.chats-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 4px;
+}
+
+.chat-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.chat-item.active {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--accent-blue);
+}
+
+.chat-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.chat-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.chat-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-last-message {
+    font-size: 13px;
+    color: var(--text-placeholder);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    font-size: 11px;
+    color: var(--text-placeholder);
+    flex-shrink: 0;
+}
+.chat-window {
+    flex-grow: 1;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-header .chat-avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.chat-header .chat-name {
+    font-size: 18px;
+    margin-bottom: 0;
+}
+
+.messages-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+.message {
+    display: flex;
+    gap: 12px;
+    max-width: 70%;
+}
+
+.message.incoming {
+    align-self: flex-start;
+}
+
+.message.outgoing {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-size: cover;
+    flex-shrink: 0;
+}
+
+.message-bubble {
+    background-color: var(--bg-input);
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.message.outgoing .message-bubble {
+    background-color: var(--accent-blue);
+    color: white;
+}
+
+.message-text {
+    word-break: break-word;
+}
+
+.message-time {
+    font-size: 10px;
+    color: var(--text-placeholder);
+    margin-top: 4px;
+    text-align: right;
+}
+
+.message-input-area {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    gap: 12px;
+    background-color: var(--bg-card);
+}
+
+.message-input {
+    flex-grow: 1;
+    background-color: var(--bg-input);
+    border: none;
+    border-radius: 24px;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+}
+
+.message-input:focus {
+    background-color: #404040;
+}
+
+.send-btn {
+    background-color: var(--accent-blue);
+    border: none;
+    border-radius: 24px;
+    padding: 0 20px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.send-btn:hover {
+    background-color: #354a9c;
+}
+
+/* Пустое состояние */
+.empty-chat {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-placeholder);
+    font-size: 16px;
+}
+
 .modal-textarea {
     width: 100%;
     padding: 14px 20px;
