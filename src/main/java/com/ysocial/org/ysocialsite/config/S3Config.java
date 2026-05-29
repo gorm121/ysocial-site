@@ -12,6 +12,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 
 @Configuration
@@ -25,6 +26,8 @@ public class S3Config {
 
     @Value("${minio.secret-key}")
     private String secretKey;
+
+    private Process seaweedProcess;
 
     @Bean
     public MinioClient s3Client() {
@@ -102,10 +105,11 @@ public class S3Config {
 
             pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
             pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-            pb.start();
+            
+            seaweedProcess = pb.start();
 
             int attempts = 0;
-            while (!isPortInUse(s3Port) && attempts < 10) { // увеличили таймаут ожидания до 10 сек
+            while (!isPortInUse(s3Port) && attempts < 10) {
                 Thread.sleep(1000);
                 attempts++;
             }
@@ -114,6 +118,25 @@ public class S3Config {
 
         } catch (IOException | InterruptedException e) {
             System.err.println("Ошибка при автоматическом запуске SeaweedFS: " + e.getMessage());
+        }
+    }
+
+    @PreDestroy
+    public void stopSeaweedFSServer() {
+        if (seaweedProcess != null && seaweedProcess.isAlive()) {
+            System.out.println("Остановка сервера SeaweedFS...");
+            seaweedProcess.destroy(); 
+            
+            try {
+
+                if (!seaweedProcess.waitFor(1, java.util.concurrent.TimeUnit.SECONDS)) {
+
+                    seaweedProcess.destroyForcibly();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            System.out.println("Сервер SeaweedFS остановлен.");
         }
     }
 
