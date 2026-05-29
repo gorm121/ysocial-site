@@ -149,7 +149,7 @@ public class MessageService {
         chatRepository.save(chat);
         Message savedMessage = messageRepository.save(mes);
 
-        emailService.sendNewMessageNotification(profile.getUserId(), currentProfile.getFirstName() + " " + currentProfile.getLastName());
+        emailService.sendNewMessageNotification(profile.getUserId().toString(), currentProfile.getFirstName() + " " + currentProfile.getLastName());
 
         return new MessageInChatDto(
             savedMessage.getSenderId(),

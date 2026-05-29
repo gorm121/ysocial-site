@@ -2,11 +2,13 @@ package com.ysocial.org.ysocialsite.service;
 
 
 import com.ysocial.org.ysocialsite.entities.Friendship;
+import com.ysocial.org.ysocialsite.entities.Profile;
 import com.ysocial.org.ysocialsite.enums.AccountStatus;
 import com.ysocial.org.ysocialsite.enums.FriendshipStatus;
 import com.ysocial.org.ysocialsite.exceptions.BadRequestException;
 import com.ysocial.org.ysocialsite.exceptions.EntityNotFoundException;
 
+import com.ysocial.org.ysocialsite.repository.ProfileRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

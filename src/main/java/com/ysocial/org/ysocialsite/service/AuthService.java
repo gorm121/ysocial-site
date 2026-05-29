@@ -69,7 +69,7 @@ public class AuthService {
                 user.getCode()
         );
 
-        emailService.sendVerificationCode(email, "Активация аккаунта" ,message);
+        emailService.sendSimpleMessage(email, "Активация аккаунта" ,message);
     }
 
     @Transactional

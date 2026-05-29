@@ -1,7 +1,10 @@
 package com.ysocial.org.ysocialsite.controller;
 
+import com.ysocial.org.ysocialsite.dto.ProfileDto;
+import com.ysocial.org.ysocialsite.dto.ProfileShortDto;
 import com.ysocial.org.ysocialsite.enums.UserRole;
 import com.ysocial.org.ysocialsite.security.CustomUserDetails;
+import com.ysocial.org.ysocialsite.service.ProfileService;
 import com.ysocial.org.ysocialsite.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,8 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @Controller
@@ -20,9 +25,11 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final UserService userService;
+    private final ProfileService profileService;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, ProfileService profileService) {
         this.userService = userService;
+        this.profileService = profileService;
     }
 
     @PostMapping("/{userId}/role")
@@ -46,7 +53,7 @@ public class AdminController {
     }
 
     @GetMapping
-    public String getAdminPage(@AuthenticationPrincipal CustomUserDetails userDetails,Model model
+    public String getAdminPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model
     ) {
         List<ProfileShortDto> users = profileService.getProfilesForAdminPage();
         ProfileDto profile = profileService.getMyProfile(userDetails);
