@@ -26,7 +26,7 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegistrationForm() {
-        return "html/register";
+        return "register";
     }
 
 
